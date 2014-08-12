@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BAB02C21-A11B-4337-948D-DF5C4FE4E240}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>AgroEnsayos.Docs</RootNamespace>
+    <AssemblyName>AgroEnsayos.Docs</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="agroensayos.txt" />
+    <Content Include="carga_inicial.sql" />
+    <Content Include="Deploys\2014-03-20\Ensayos_Get.sql" />
+    <Content Include="Imports\20140321\Productos\Maiz\InsertProductos-Maiz.sql" />
+    <Content Include="Imports\20140321\Productos\Soja\InsertProductos-Soja.sql" />
+    <Content Include="Imports\20140321\Productos\Trigo\InsertProductos-Trigo.sql" />
+    <Content Include="InsertEnsayos.sql" />
+    <Content Include="InsertEnsayosMaiz.sql" />
+    <Content Include="InsertEnsayosSoja.sql" />
+    <Content Include="InsertEnsayosTrigo.sql" />
+    <Content Include="InsertProductos.sql" />
+    <Content Include="InsertProductosMaiz.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AgroEnsayos_2013-10-04.rar" />
+    <None Include="AgroEnsayos_2013-10-15.rar" />
+    <None Include="AtributosEquivalenciasTrigo.xlsx" />
+    <None Include="Departamentos Argentina.csv" />
+    <None Include="Departamentos Argentina.kml" />
+    <None Include="Departamentos Argentina.xlsx" />
+    <None Include="Imports\20140321\Ensayos\Ensayos Maiz.xlsx" />
+    <None Include="Imports\20140321\Ensayos\Ensayos SOJA.xlsx" />
+    <None Include="Imports\20140321\Ensayos\Ensayos Trigo.xlsx" />
+    <None Include="Imports\20140321\Productos\Maiz\Maiz.xls" />
+    <None Include="Imports\20140321\Productos\Productos.xlsx" />
+    <None Include="Imports\20140321\Productos\Soja\Soja.xls" />
+    <None Include="Imports\20140321\Productos\Trigo\Trigo.xls" />
+    <None Include="Imports\Ensayos\Ensayos Maiz.xlsx" />
+    <None Include="Imports\Ensayos\Ensayos SOJA.xlsx" />
+    <None Include="Imports\Ensayos\Ensayos Trigo.xlsx" />
+    <None Include="Maiz.xls" />
+    <None Include="Trigo.xls" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Imports\Ensayos\Procesados\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

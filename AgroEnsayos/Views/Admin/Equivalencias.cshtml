@@ -1,0 +1,216 @@
+﻿@using AgroEnsayos.Entities;
+@model AgroEnsayos.Models.EquivalenciaModel
+@{
+    ViewBag.Title = "Administración - Equivalencias de Atributos";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    List<Categoria> items = ViewBag.Categorias as List<Categoria>;
+}
+<div class="row">
+    <div class="col-lg-12">
+        <h1>Equivalencias de Atributos</h1>
+        <div class="col-sm-4">
+            Elegir Categoría:
+            <select id="categoriaSelect" onchange="javascript:cargarAtributos();">
+                <option value="0">-- Categoria --</option>
+                @{
+                    if (items != null)
+                    {
+                        foreach (Categoria item in items)
+                        {
+                <option value="@item.Id">@item.Nombre</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-sm-8">
+
+            Elegir Atributo:
+            <select id="atributoSelect" onchange="javascript:cargarEquivalencias();"></select>
+        </div>
+    </div>
+</div>
+<div id="addEquivalenciaDiv" style="display: none" class="row top-margin-10">
+    <div class="col-sm-12">
+        Nueva Equivalencia:
+        <input type="text" id="equivalenciaInput" class="wm" />
+        =
+        <input type="text" id="escalaInput" class="ws" />
+        -->
+        <input type="submit" value="Agregar Equivalencia" id="saveEquivalenciaButton" class="btn btn-large btn-success" />
+        <input type="submit" value="Guardar" id="saveButton" class="btn btn-large btn-primary" />
+    </div>
+</div>
+
+<div class="row top-margin-10">
+    <div class="col-sm-12">
+        <div id="draglists" style="display: none" class="col-sm-12">
+            <div style="float: left; margin-left: 15px;">
+                <ul id="valoresList" class="sortable-list ui-sortable"></ul>
+            </div>
+            <div id="equivalenciasDiv" style="margin-left: 15px;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#saveEquivalenciaButton').click(function () {
+            saveEquivalencia();
+        });
+
+        $('#saveButton').click(function () {
+            save();
+        });
+    });
+
+    function save() {
+        var atributoId = $('#atributoSelect').val();
+        if (atributoId != 0) {
+            var equivalencias = [];
+            $('#equivalenciasDiv').children().find("ul").each(function () {
+                var eq = $(this).attr('eq');
+                var es = $(this).attr('es');
+                $(this).find("li").each(function (i, item) {
+                    equivalencias.push({ AtributoId: atributoId, Equivalencia: eq, Valor: $(item).html(), Escala: es });
+                });
+            });
+
+            if (equivalencias.length > 0) {
+                $.ajax({
+                    url: '@Url.Action("SaveEquivalencia", "Atributos")',
+                    data: JSON.stringify({ Equivalencias: equivalencias }),
+                    contentType: 'application/json',
+                    //dataType: 'json',
+                    type: 'POST',
+                    success: function () {
+                        alert('Las equivalencias se guardaron correctamente');
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        alert(textStatus);
+                    }
+                });
+            }
+        }
+    }
+
+    function cargarEquivalencias() {
+        $('#addEquivalenciaDiv').show();
+        $('#valoresList').empty();
+        $('#equivalenciasDiv').empty();
+        var id = $('#atributoSelect').val();
+        if (id != 0) {
+            cargarValores(id);
+
+            $.ajax({
+                url: '@Url.Action("GetEquivalencias", "Atributos")',
+                data: { atributoId: id },
+                type: 'GET',
+                contentType: "application/json ; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    if (data != undefined && data != '') {
+                        if (data.length > 0) {
+                            $('#draglists').show();
+                        }
+
+                        $.each(data, function (i, item) {
+                            addEquivalencia(item.AtributoId, item.Equivalencia, item.Escala, item.Valor);
+                        });
+
+                        $('#draglists .sortable-list').sortable({
+                            connectWith: '#draglists .sortable-list',
+                            placeholder: 'placeholder'
+                        });
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert(textStatus);
+                }
+            });
+        }
+    }
+
+    function addEquivalencia(id, equivalencia, escala, valor) {
+        //Agrego el Header
+        if ($('#header' + escala).html() == undefined) {
+            var html = '<span>' + equivalencia + '</span> = <span>' + escala + '</span>'
+                + '<br /><ul id="list' + escala + '" class="sortable-list ui-sortable" eq="' + equivalencia + '" es="' + escala + '"></ul>';
+            $('<div id="header' + escala + '" style="float: left; margin: 10px"></div>').html(html).appendTo('#equivalenciasDiv');
+        }
+
+        if (valor != null && valor != '') {
+            $('#list' + escala).append('<li class="sortable-item">' + valor + '</li>');
+        }
+    }
+
+    function saveEquivalencia() {
+        //TODO: validar que no exista
+        var id = $('#atributoSelect').val();
+        if (id != 0) {
+
+            addEquivalencia(id, $('#equivalenciaInput').val(), $('#escalaInput').val(), null);
+
+            $('#equivalenciaInput').val('');
+            $('#escalaInput').val('');
+            $('#draglists').show();
+
+            $('#draglists .sortable-list').sortable({
+                connectWith: '#draglists .sortable-list',
+                placeholder: 'placeholder'
+            });
+        }
+    }
+
+    function cargarValores(id) {
+        $('#valoresList').empty();
+        $('#equivalenciasDiv').empty();
+
+        $.ajax({
+            url: '@Url.Action("GetValores", "Atributos")',
+            data: { atributoId: id },
+            type: 'GET',
+            contentType: "application/json ; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                if (data.length > 0) {
+                    $('#draglists').show();
+                }
+                $.each(data, function (i, item) {
+                    $('#valoresList').append('<li class="sortable-item">' + item + '</li>');
+                });
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert(errorThrown);
+            }
+        });
+    }
+
+    function cargarAtributos() {
+        var id = $('#categoriaSelect').val();
+        $('#valoresList').empty();
+        $('#equivalenciasDiv').empty();
+        if (id != 0) {
+            $('#atributoSelect').empty();
+            $('#atributoSelect').append('<option value=0>-- Atributo --</option>')
+            $.ajax({
+                url: '@Url.Action("GetAtributos", "Atributos")',
+                data: { categoriaId: id },
+                type: 'GET',
+                contentType: "application/json ; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    $.each(data, function (i, item) {
+                        $('#atributoSelect').append('<option value=' + item.Id + '>' + item.Nombre + '</option>');
+                    });
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert(textStatus);
+                }
+            });
+        }
+    }
+</script>
+
+

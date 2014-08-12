@@ -1,0 +1,41 @@
+﻿@model AgroEnsayos.Models.LoginModel
+@{
+    ViewBag.CategoriaId = 0;   
+}
+
+<section id="loginForm" class="container">
+    <div class="container header">
+        <img src="../images/logo.png" class="logo" />
+    </div>
+    <div class="box">
+        @using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+            <div class="box1">
+                <img src="../images/video.jpg" />
+            </div>
+            <div class="box1">
+                <div>
+                    @Html.TextBoxFor(m => m.Name, new { placeholder = "Usuario AgroTool" })
+                    @Html.ValidationMessageFor(m => m.Name)
+                </div>
+                <div>
+                    @Html.PasswordFor(m => m.Password, new { placeholder = "Contraseña" })
+                    @Html.ValidationMessageFor(m => m.Password)
+                </div>
+                <div style="text-align: left">
+                    <input data-val="true" data-val-required="" id="RememberMe" name="RememberMe" type="checkbox">
+                    <label for="RememberMe">Recordarme?</label>
+                    
+                    @Html.ActionLink("Nuevo Usuario", "NewUser","Account",new {@class = "but_new_user", id = "new_user" , style="color: white;text-align: center;width: 120px;height: 20px;float: right;padding: 0px;margin-top: 0px;font-size: 12px;padding-top: 2px;"})                    
+                </div>
+                <div style="text-align: left">
+                    <input type="submit" value="INICIAR SESIÓN" style="width: 300px" />
+                </div>
+            </div>
+            <div style="clear: both"></div>
+        }
+    </div>
+</section>
+

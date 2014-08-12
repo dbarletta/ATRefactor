@@ -1,0 +1,83 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgroEnsayos", "AgroEnsayos\AgroEnsayos.csproj", "{4D5D1287-AAF1-47FC-B045-BAB37D28BC27}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgroEnsayos.Tests", "AgroEnsayos.Tests\AgroEnsayos.Tests.csproj", "{0BCF1CA7-974F-46FC-A1C3-A3C5D62A8CF4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgroEnsayos.Services", "AgroEnsayos.Services\AgroEnsayos.Services.csproj", "{DD9B43D8-19B5-4868-9D35-6858C06E8BD0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgroEnsayos.Entities", "AgroEnsayos.Entities\AgroEnsayos.Entities.csproj", "{5894D6F4-5A5B-458C-9A6A-B502E3665633}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgroEnsayos.Docs", "AgroEnsayos.Docs\AgroEnsayos.Docs.csproj", "{BAB02C21-A11B-4337-948D-DF5C4FE4E240}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{28ECF9D0-8A6E-4D52-90E7-FB6F4B16ACEF}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "AgroEnsayos.Database", "AgroEnsayos.Database\AgroEnsayos.Database.sqlproj", "{769DBBF0-C69E-4608-98B8-59F10CA9D6F1}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 7
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://iantech.visualstudio.com/defaultcollection
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = AgroEnsayos\\AgroEnsayos.csproj
+		SccProjectName1 = AgroEnsayos
+		SccLocalPath1 = AgroEnsayos
+		SccProjectUniqueName2 = AgroEnsayos.Tests\\AgroEnsayos.Tests.csproj
+		SccProjectName2 = AgroEnsayos.Tests
+		SccLocalPath2 = AgroEnsayos.Tests
+		SccProjectUniqueName3 = AgroEnsayos.Services\\AgroEnsayos.Services.csproj
+		SccProjectName3 = AgroEnsayos.Services
+		SccLocalPath3 = AgroEnsayos.Services
+		SccProjectUniqueName4 = AgroEnsayos.Entities\\AgroEnsayos.Entities.csproj
+		SccProjectName4 = AgroEnsayos.Entities
+		SccLocalPath4 = AgroEnsayos.Entities
+		SccProjectUniqueName5 = AgroEnsayos.Docs\\AgroEnsayos.Docs.csproj
+		SccProjectName5 = AgroEnsayos.Docs
+		SccLocalPath5 = AgroEnsayos.Docs
+		SccProjectUniqueName6 = AgroEnsayos.Database\\AgroEnsayos.Database.sqlproj
+		SccProjectName6 = AgroEnsayos.Database
+		SccLocalPath6 = AgroEnsayos.Database
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4D5D1287-AAF1-47FC-B045-BAB37D28BC27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D5D1287-AAF1-47FC-B045-BAB37D28BC27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D5D1287-AAF1-47FC-B045-BAB37D28BC27}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D5D1287-AAF1-47FC-B045-BAB37D28BC27}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{0BCF1CA7-974F-46FC-A1C3-A3C5D62A8CF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BCF1CA7-974F-46FC-A1C3-A3C5D62A8CF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BCF1CA7-974F-46FC-A1C3-A3C5D62A8CF4}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BCF1CA7-974F-46FC-A1C3-A3C5D62A8CF4}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{DD9B43D8-19B5-4868-9D35-6858C06E8BD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD9B43D8-19B5-4868-9D35-6858C06E8BD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD9B43D8-19B5-4868-9D35-6858C06E8BD0}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD9B43D8-19B5-4868-9D35-6858C06E8BD0}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{5894D6F4-5A5B-458C-9A6A-B502E3665633}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5894D6F4-5A5B-458C-9A6A-B502E3665633}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5894D6F4-5A5B-458C-9A6A-B502E3665633}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{5894D6F4-5A5B-458C-9A6A-B502E3665633}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{BAB02C21-A11B-4337-948D-DF5C4FE4E240}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAB02C21-A11B-4337-948D-DF5C4FE4E240}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAB02C21-A11B-4337-948D-DF5C4FE4E240}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAB02C21-A11B-4337-948D-DF5C4FE4E240}.Release|Any CPU.Build.0 = Release|Any CPU
+		{769DBBF0-C69E-4608-98B8-59F10CA9D6F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{769DBBF0-C69E-4608-98B8-59F10CA9D6F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{769DBBF0-C69E-4608-98B8-59F10CA9D6F1}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{769DBBF0-C69E-4608-98B8-59F10CA9D6F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{769DBBF0-C69E-4608-98B8-59F10CA9D6F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{769DBBF0-C69E-4608-98B8-59F10CA9D6F1}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

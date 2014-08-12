@@ -1,0 +1,40 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+@using AgroEnsayos.Helpers;
+
+@{
+    ViewBag.Title = "Error";
+    var ex = ViewBag.Exception as Exception; //Agregado
+}
+
+@*<hgroup class="title">
+    <h1 class="error">Error.</h1>
+    <h2 class="error">An error occurred while processing your request.</h2>
+</hgroup>*@
+
+<div class="msg-exception msg-exception-inpage" style="margin-top:50px;"> //Agregado
+    <hgroup>
+        <h1>Error en el servidor</h1>
+        <h2>Ocurrió un error procesando su solicitud</h2>
+    </hgroup>
+    <p>
+        Por favor, intente nuevamente en unos instantes.
+        <br />Si el problema persiste contacte con un administrador, informándole las acciones que hayan derivado en este error.
+        <br />Tenga a bien referirle al administrador la fecha y hora en que haya recibido el último error, para poder investigar los logs del sistema.
+        <br />Disculpe las molestias ocasionadas,
+    </p>
+    <br /><br />
+    <span> El equipo de AgroTool.</span>
+</div>
+
+<input id="exception" type="hidden" value="@(Html.Raw(ex.ToJson()))" />
+
+<script>    //Agregado
+    $(document).ready(function () {
+        var ex = JSON.parse($('#exception').val());
+        if (ex) {
+            consoleLog(ex);
+            if (ex.HResult == 0)
+                openException(ex);
+        }
+    });
+</script>

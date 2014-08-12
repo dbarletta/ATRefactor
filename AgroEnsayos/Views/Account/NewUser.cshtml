@@ -1,0 +1,211 @@
+﻿@using AgroEnsayos.Entities;
+@using AgroEnsayos.Services;
+@{
+
+    List<string> provincias = LugarService.GetProvincias();
+    List<Categoria> items = ViewBag.Categorias as List<Categoria>;
+       
+ }
+
+    <div class="container" style="background-color: #f7f7f7;width: 550px;margin-top: 100px;text-align: left;padding-top: 20px;padding-left: 50px;">
+    
+       @using (Html.BeginForm("SaveUser", "Account", FormMethod.Post, new { id = "Resultform" }))
+        {
+
+        <div style="margin-bottom: 40px;font-size: 20px;margin-left: 130px;">
+            <span><b>Ingreso Nuevo Usuario</b></span>
+        </div>   
+           
+        <div>
+            <label style="width: 70px;font-weight: bold;" for="name">Usuario:</label>
+            <input type="hidden" id="userId" name="userId" value="">
+            <input type="text" id="name" name="name" title="Ingrese el usuario" required />
+        </div>
+        <div>
+            <label style="width: 70px;font-weight: bold;" for="password">Clave:</label>
+            <input type="password" id="password" name="password" title="Ingrese la clave" required />
+        </div>
+        
+        <div>
+            <label style="width: 70px;font-weight: bold;" for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" title="Ingrese el nombre" required />
+        </div>
+        <div>
+            <label style="width: 70px;font-weight: bold;" for="apellido">Apellido:</label>
+            <input type="text" id="apellido" name="apellido" title="Ingrese el apellido" required />
+        </div>
+
+        <div>
+            <label style="width: 70px;font-weight: bold;" for="empresa">Empresa:</label>
+            <input type="text" id="empresa" name="empresa" title="Ingrese la empresa" required />
+        </div>
+
+        <div>
+                <label style="width: 70px;font-weight: bold;" for="provincia">Provincia</label>
+                <select id="provincia" name="provincia" class="select_new_user" style="width: 310px;" onchange="ChangeLocalidades(this.value)">
+                    <option value="0">&nbsp;</option>
+                    @foreach (string h in provincias)
+                    {
+                        <option value="@h.ToString()">@h.ToString()</option>
+                    }
+                </select>
+         </div>
+        <div>
+                <label style="width: 70px;font-weight: bold;" for="localidad">Localidad:</label>
+                <select id="localidad" class="select_new_user" style="width: 310px;" name="localidad">
+                    <option>&nbsp;</option>
+                </select>
+        </div>
+        
+        <div>
+            <label style="width: 70px;font-weight: bold;" for="email">Email:</label>
+            <input type="text" id="email" name="email" title="Ingrese el e-mail" required />
+        </div>
+
+        <div style="margin-bottom:20px">
+            <label style="width: 170px;font-weight: bold;float: left;" for="cultivos">Semillas de interes:</label>
+            <div style="width: 200px;margin-left: 170px;">
+            @{
+                    if (items != null)
+                    {
+                        foreach (Categoria item in items.Where(x => x.Padre == "Semillas"))
+                        {
+                            <input type="checkbox"  value="@item.Id" style="width: 30px;" id="cultivos" name="cultivos" /><span style="width:50px;">@item.Nombre</span>
+                        }
+                    }
+                }  
+            </div>
+        </div>   
+        
+        <div>
+            <label style="width: 170px;font-weight: bold;float:left" for="cultivos">Fitosanitarios de interes:</label>
+            <div style="width: 200px;margin-left: 170px;">
+                @{
+            if (items != null)
+            {
+                foreach (Categoria item in items.Where(x => x.Padre == "Fitosanitarios"))
+                {
+                            <input type="checkbox" value="@item.Id" style="width:30px;" id="cultivos" name="cultivos" /><span>@item.Nombre</span>
+                }
+            }
+                }  
+        </div>   
+        </div> 
+              
+        <div style="margin-left: 120px;">
+            <input type="submit" id="okButton" value="Guardar" onclick="return ValidateData();" style="margin-left:20px;margin-right:20px;" />
+            <input type="button" class="but_new_user" id="cancelButton" value="Cancelar" onclick="redirectLogin();" />
+        </div>
+           
+        <div>&nbsp;</div>
+              
+       }
+
+     </div>
+
+<script>
+
+    function ChangeLocalidades(provID)
+    {
+       // alert(provID);
+        $.ajax({
+            url: 'GetLocalidades_x_prov',
+            data: { provincia : provID},
+            type: 'POST',
+            success: function (data) {
+                //alert(data.result);
+                var arLocalidades = data.result;
+                var sel = document.getElementById('localidad');
+
+                var i = 0;
+                $('#localidad').empty();
+
+                while (i < arLocalidades.length)
+                {
+                    var opt = document.createElement('option');
+                    opt.innerHTML = arLocalidades[i];
+                    opt.value = arLocalidades[i];
+                    sel.appendChild(opt);
+                    i = i + 1;
+                }
+
+            },
+            error: function (data) {
+                //alert(data.)
+                //alert($('#addItemForm').serialize());
+            }
+        });
+
+    }
+
+    function redirectLogin()
+    {
+        window.location.href = "Login";
+    }
+
+    function ValidateData()
+    {
+        if ($("#name").val() == "")
+        {
+            alert("Debe completar el usuario");
+            return false;
+        }
+
+        if ($("#nombre").val() == "") {
+            alert("Debe completar el nombre");
+            return false;
+        }
+
+        if ($("#password").val() == "") {
+            alert("Debe completar el password");
+            return false;
+        }
+
+        if ($("#apellido").val() == "") {
+            alert("Debe completar el apellido");
+            return false;
+        }
+
+        if ($("#email").val() == "") {
+            alert("Debe completar el email");
+            return false;
+        }
+
+        if ($("#empresa").val() == "") {
+            alert("Debe completar la empresa");
+            return false;
+        }
+
+        //Valida que usuarios existentes
+        $.ajax({
+            url: 'UserExists',
+            data: { name: $("#name").val() },
+            type: 'POST',
+            success: function (data) {
+                if (data.result == 1)
+                {
+                    alert('El usuario ya existe, por favor elija otro');
+                    return false;
+                }
+                    
+            },
+            error: function (data) {
+                //alert(data.)
+                //alert($('#addItemForm').serialize());
+            }
+        });
+
+
+        //Valida Cultivos
+        var fields = $("input[name='cultivos']").serializeArray();
+        if (fields.length == 0) {
+            alert('Debe seleccionar al menos un cultivo de interes');
+            return false;
+        }
+
+
+        alert('Debe completar los datos');
+        return false;
+    }
+
+</script>

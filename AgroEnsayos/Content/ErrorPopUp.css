@@ -1,0 +1,17 @@
+﻿
+.fancyboxcontainer { display: none; }
+.le { text-align: left; }
+
+/********** Error screen and popup **********/
+.msg-exception { text-align: center !important; max-width: 400px; padding: 10px 22px; }
+    .msg-exception h1 { color: #B82D2D; font-size:20px }
+    .msg-exception h2 { text-align: center !important; font-size:15px }
+    .msg-exception span { float: right; font-weight: bold; font-size:15px  }
+    .msg-exception.msg-exception-inpage { margin: 1px auto; border: 1px solid #B82D2D; border-radius: 30px; padding: 35px 42px; }
+    .msg-exception a { float: left; color: #2a6496 !important; }
+
+.msg-exception-it { text-align: left; display:none; height:310px; max-width: 400px; }
+.msg-exception-it h2 { text-align: center !important; font-size:15px }
+.msg-exception-it textarea { min-width: 400px; min-height: 100px; }
+.msg-exception-it a { float: left; color: #2a6496 !important; }
+

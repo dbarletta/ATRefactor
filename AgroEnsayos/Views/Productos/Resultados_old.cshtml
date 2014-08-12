@@ -1,0 +1,583 @@
+﻿@model AgroEnsayos.Models.SearchModel
+@using AgroEnsayos.Entities;
+@using AgroEnsayos.Helpers;
+@{
+    List<Atributo> filtros = ViewBag.Filtros as List<Atributo>;
+    List<String> regiones = ViewBag.Regiones as List<String>;
+    List<Empresa> empresas = ViewBag.Empresas as List<Empresa>;
+
+    string oldSort = ViewBag.OldSort as string;
+    string selectAgroup = ViewBag.SelectAgroup as string;
+    string selectAgroupAux = "";
+
+    List<string> list_filters = ViewBag.list_filters as List<string>;
+    int i_fil = 0;
+
+    string auxRubro = "";
+    string auxNombre = "";
+    string auxRubro_ultimo = "";
+    List<Atributo> auxFiltro = new List<Atributo>();
+
+    Dictionary<string, List<string>> dicStr = new Dictionary<string, List<string>>();
+    Dictionary<string, List<string>> dicStrFil = new Dictionary<string, List<string>>();
+
+    string strNombre = "";
+    string strNombre_aux = "";
+    string strId = "";
+    string strValor = "";
+    string strId1 = "";
+    string strValor1 = "";
+    int tam = 0;
+    int tam_aux = 0;
+    string strFilterFor = "";
+
+    string ord_producto = "";
+    string ord_empresa = "";
+    string ord_ciclo = "";
+    string ord_madurez = "";
+    string ord_material = "";
+    string ord_altura = "";
+
+    int i_atr=0;
+                                    
+    
+    if (oldSort.IndexOf("nombre") >= 0)
+    {
+        ord_producto = "ord_selected";
+    }
+    if (oldSort.IndexOf("empresa") >= 0)
+    {
+        ord_empresa = "ord_selected";
+    }
+    if (oldSort.IndexOf("ciclo") >= 0)
+    {
+        ord_ciclo = "ord_selected";
+    }
+    if (oldSort.IndexOf("material") >= 0)
+    {
+        ord_material = "ord_selected";
+    }
+    if (oldSort.IndexOf("altura") >= 0)
+    {
+        ord_altura = "ord_selected";
+    }
+    if (oldSort.IndexOf("madurez") >= 0)
+    {
+        ord_madurez = "ord_selected";
+    }
+    
+}
+@section featured {
+
+    @using (Html.BeginForm("Resultados", "Productos", FormMethod.Post, new { id = "Resultform" }))
+    {
+        <div class="container header header3">
+            <div class="logo2">
+                <a href="/Home/" title="Volver a la Página Principal">
+                    <img src="/images/logo.png" class="logo"></a>
+            </div>
+            <div class="searchrow2">
+                <input type="hidden" value="@Model.CategoriaIdProductos" id="CategoriaIdProductos" name="CategoriaIdProductos">
+                <input data-val="true" data-val-required="Debe escribir algo" id="BuscarProductos" name="BuscarProductos" class="searchtext big" placeholder="Buscar" type="text" value="@Model.BuscarProductos"><input type="submit" class="searchicon" style="margin-right: 50px" value=""><input type="button" class="userbutton" />
+            </div>
+        </div>
+        <div class="container header header3" style="height: 40px;">
+            <div class="breadcrumb" style="float: left">
+                @Html.ActionLink("Cultivos", "Index", "Home")
+                @if (Model.Categoria != null)
+                {
+                    <span>&nbsp;>&nbsp;</span>
+                    @Html.ActionLink(Model.Categoria, "Busqueda/" + Model.CategoriaIdProductos, "Home")
+                }
+            </div>
+            <div class="styled-select" style="float: right; margin-top: 2px;">
+                <span>Agrupar por:</span>
+                @Html.Hidden("h_select_agroup", selectAgroup)
+                @Html.Hidden("h_select_agroup_aux", "")
+
+                <select id="select_agroup" name="select_agroup" class="select_agroup" onchange="AgroupSubmit(this);">
+                    <option value=""></option>
+                    <option value="empresa">Empresa</option>
+                    @if (Model.CategoriaIdProductos == 6)
+                    {
+                        <option value="madurez">Madurez</option>
+                    }
+                    else
+                    {
+                        <option value="ciclo">Ciclo</option>
+                    }
+                    <option value="altura">Altura</option>
+                    <option value="material">Material</option>
+                </select>
+            </div>
+        </div>
+        <div class="container header3" style="background-color: #f7f7f7">
+            <div id="div_filter" style="float: left; width: 240px; background-color: #f7f7f7;">
+                <input type="hidden" id="remove_id_filter" name="remove_id_filter" value="">
+
+                <input type="hidden" id="new_id_filter" name="new_id_filter" value="">
+                <input type="hidden" id="new_val_filter" name="new_val_filter" value="">
+                <input type="hidden" id="new_name_filter" name="new_name_filter" value="">
+
+                @if (list_filters != null && list_filters.Count > 0)
+                {
+                    <div class="apply-filters" style="width:205px;"><span>Filtros Aplicados</span>
+                            <input value="&nbsp;" class="input_todo" id="del_todo" name="del_todo" type="button" title="Eliminar Filtros" onclick="removeFilter(9999)"  />
+                    </div>
+                    foreach (string strFilter in list_filters)
+                    {
+                        tam = strFilter.IndexOf("--");
+                        strNombre = strFilter.Substring(0, tam);
+
+                        tam_aux = tam + 2;
+                        tam = strFilter.IndexOf("--", tam_aux);
+                        strId = strFilter.Substring(tam_aux, tam - tam_aux);
+
+                        tam_aux = tam + 2;
+                        strValor = strFilter.Substring(tam_aux);
+
+                        if (strNombre_aux == "")
+                        {
+                            strNombre_aux = strNombre;
+                            dicStrFil.Add(strNombre_aux, new List<string>());
+                        }
+
+                        if (strNombre == strNombre_aux)
+                        {
+                            dicStrFil[strNombre_aux].Add(strId + "--" + strValor);
+                        }
+                        else
+                        {
+                    <div class='apply-filter'>
+                        <span><b>@strNombre_aux.ToString()</b></span>
+                        @foreach (string str in dicStrFil[strNombre_aux])
+                        {
+                            tam = str.IndexOf("--");
+                            strId1 = str.Substring(0, tam);
+
+                            tam_aux = tam + 2;
+                            strValor1 = str.Substring(tam_aux);
+                            strFilterFor = strNombre_aux + "--" + strId1 + "--" + strValor1;
+                            <div class="div_filter">
+                                <input value="&nbsp;" class="input_fil" id="del_@i_fil.ToString()" name="del_@i_fil.ToString()" type="button" title="Borrar Filtro" onclick="removeFilter(@i_fil)"  />
+                                <span>@strValor1.ToString()</span>
+                                <input type="hidden" id="list_filters" name="list_filters" class="listFilter" value="@strFilterFor.ToString()">
+                            </div>
+                            i_fil++;
+                        }
+                    </div>
+                        dicStrFil.Clear();
+                        dicStrFil.Add(strNombre, new List<string>());
+                        dicStrFil[strNombre].Add(strId + "--" + strValor);
+                        }
+                        strNombre_aux = strNombre;
+                    }
+
+                    if (dicStrFil.Count > 0)
+                    {
+                    <div class='apply-filter'>
+                        <span><b>@strNombre_aux.ToString()</b></span>
+                        @foreach (string str in dicStrFil[strNombre_aux])
+                        {
+                            tam = str.IndexOf("--");
+                            strId = str.Substring(0, tam);
+
+                            tam_aux = tam + 2;
+                            strValor = str.Substring(tam_aux);
+                            strFilterFor = strNombre_aux + "--" + strId + "--" + strValor;
+                            <div class="div_filter">
+                                <input value="&nbsp;" class="input_fil" id="del_@i_fil.ToString()" name="del_@i_fil.ToString()" type="button" title="Borrar Filtro" onclick="removeFilter(@i_fil)"  />
+                                <span>@strValor.ToString()</span>
+                                <input type="hidden" id="list_filters" name="list_filters" class="listFilter" value="@strFilterFor.ToString()">
+                            </div>
+                            i_fil++;
+                        }
+                    </div>
+                        i_fil = 0;
+                    }
+                }
+                <!-- Filtro de Empresa, Nuevo (o no) y ubicacion -->
+                <div class='block-filters'>
+                    <dl>
+                        <!-- dt onclick="MostrarDt(this);">&nbsp;</!-->
+                        <dd>
+                            <ol>
+                                <li>
+                                    <a href="javaScript:void(0);" onclick="OpenValues('val_empresa');">Empresa</a>
+                                    <div id="val_empresa" style="display: none; padding: 20px 0 0 10px;">
+                                        <!-- select id="fil_empresa" onchange="sendFilter('fil_empresa','Empresa')">
+                                            <option value="">&nbsp;</option>
+                                            @foreach (Empresa e in empresas)
+                                            {
+                                                <option value="@e.Id">@e.Nombre</option>;
+                                            }
+                                        </!-->
+                                        @if (empresas != null)
+                                        {
+                                            i_atr = 0;
+                                            foreach (Empresa e in empresas)
+                                            {
+                                                <a style="width:180px" id="fil_empresa_@i_atr" name="fil_empresa_@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_empresa_','Empresa','@i_atr','@e.Id');">@e.Nombre</a>
+                                                i_atr++;
+                                            }
+                                        }
+                                    </div>
+                                </li>
+                                <li>
+                                    <a href="javaScript:void(0);" onclick="OpenValues('val_antiguedad');">Nuevo</a>
+                                    <div id="val_antiguedad" style="display: none; padding: 20px 0 0 10px;">
+                                        <!--select id="fil_antiguedad" onchange="sendFilter('fil_antiguedad','Nuevo')">
+                                            <option value="">&nbsp;</option>
+                                            <option value="1">Si</option>
+                                            <option value="0">No</option>
+                                        </!--select -->
+                                        <a style="width:180px" id="fil_antiguedad_1" name="fil_antiguedad_1" href="javaScript:void(0);" onclick="sendFilter_a('fil_antiguedad_','Nuevo','1','Si');">Si</a>
+                                       <a style="width:180px" id="fil_antiguedad_0" name="fil_antiguedad_0" href="javaScript:void(0);" onclick="sendFilter_a('fil_antiguedad_','Nuevo','0','No');">No</a>
+                                    </div>
+                                </li>
+                                <li>
+                                    <a href="javaScript:void(0);" onclick="OpenValues('val_region');">Region</a>
+                                    <div id="val_region" style="display: none; padding: 20px 0 0 10px;">
+                                        <!-- select id="fil_region" onchange="sendFilter('fil_region','Region')">
+                                            <option value="">&nbsp;</option>
+                                            @if (regiones != null)
+                                            {
+                                                foreach (String l in regiones)
+                                                {
+                                                <option value="@l">@l</option>;
+                                                }
+                                            }
+                                        </!-->
+                                        @if (regiones != null)
+                                        {
+                                            i_atr = 0;
+                                            foreach (String l in regiones)
+                                            {
+                                                <a style="width:180px" id="fil_region_@i_atr" name="fil_region_@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_region_','Region','@i_atr','@l');">@l</a>
+                                                i_atr++;
+                                            }
+                                        }
+                                    </div>
+                                </li>
+                            </ol>
+                        </dd>
+                    </dl>
+                </div>
+
+
+                @foreach (Atributo oArt in filtros)
+                {
+                    if (auxRubro == "")
+                    {
+                        auxRubro = oArt.Rubro;
+                    }
+
+                    if (oArt.Rubro == auxRubro)
+                    {
+                        auxRubro_ultimo = oArt.Rubro;
+                        if (oArt.Nombre != auxNombre)
+                        {
+                            auxNombre = oArt.Nombre;
+
+                            dicStr.Add(auxNombre, new List<string>());
+
+
+                            auxFiltro.Add(oArt);
+                        }
+                        dicStr[auxNombre].Add(oArt.equivalencia_valor);
+
+                    }
+                    else
+                    {
+                    <div class='block-filters'>
+                        <dl>
+                            <dt onclick="MostrarDt(this);">@auxRubro</dt>
+                            <dd>
+                                <ol>
+                                    @foreach (Atributo Atr in auxFiltro)
+                                    {
+                                        i_atr = 0;
+                                        <li>
+                                            <a href="javaScript:void(0);" onclick="OpenValues('val_@Atr.Id');">@Atr.Nombre</a>
+                                            <div id="val_@Atr.Id" style="display:none;padding: 20px 0 0 10px;">
+                                                <!-- select style="width:180px" id="fil_@Atr.Id" name="fil_@Atr.Id" onchange="sendFilter('fil_@Atr.Id','@Atr.Nombre');">
+                                                    <option value="">&nbsp;</option>
+                                                    @foreach (string str in dicStr[Atr.Nombre])
+                                                    {
+                                                        if (str.ToString() != "")
+                                                        {
+                                                        <option value="@Atr.Id">@str.ToString()</option>;
+                                                        }
+                                                    }
+                                                </!-->
+                                                @foreach (string str in dicStr[Atr.Nombre])
+                                                {
+                                                    if (str.ToString() != "")
+                                                    {
+                                                        <a style="width:180px" id="fil_@Atr.Id@i_atr" name="fil_@Atr.Id@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_@Atr.Id','@Atr.Nombre','@i_atr','@Atr.Id');">@str.ToString()</a>
+                                                    }
+                                                    i_atr++;
+                                                }
+                                            </div>
+                                        </li>
+                                    }
+                                </ol>
+                            </dd>
+                        </dl>
+                    </div>
+                                    auxFiltro.Clear();
+                                    dicStr.Clear();
+                                    auxRubro = oArt.Rubro;
+                    }
+                }
+                @if (auxFiltro.Count > 0)
+                {
+                    <div class='block-filters'>
+                        <dl>
+                            <dt onclick="MostrarDt(this);">@auxRubro_ultimo</dt>
+                            <dd>
+                                <ol>
+                                    @foreach (Atributo Atr1 in auxFiltro)
+                                    {
+                                        i_atr = 0;
+                                        <li>
+                                            <a href="javaScript:void(0);" onclick="OpenValues('val_@Atr1.Id');">@Atr1.Nombre</a>
+                                            <div id="val_@Atr1.Id"  style="display:none;padding: 20px 0 0 10px;">
+                                                <!-- select style="width: 180px" id="fil_@Atr1.Id" name="fil_@Atr1.Id" onchange="sendFilter('fil_@Atr1.Id','@Atr1.Nombre');">
+                                                    <option value="">&nbsp;</option>
+                                                    @foreach (string str in dicStr[Atr1.Nombre])
+                                                    {
+                                                        if (str.ToString() != "")
+                                                        {
+                                                        <option value="1">@str.ToString()</option>;
+                                                        }
+                                                    }
+                                                </!-->
+                                                @foreach (string str in dicStr[Atr1.Nombre])
+                                                {
+                                                    if (str.ToString() != "")
+                                                    {
+                                                        <a style="width:180px" id="fil_@Atr1.Id@i_atr" name="fil_@Atr1.Id@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_@Atr1.Id','@Atr1.Nombre','@i_atr','@Atr1.Id');">@str.ToString()</a>
+                                                    }
+                                                    i_atr++;
+                                                }
+                                            </div>
+                                        </li>
+                                    }
+                                </ol>
+                            </dd>
+                        </dl>
+                    </div>
+                }
+
+
+            </div>
+            <div id="div_product" style="float: left; background-color: #ffffff; width: 700px; padding-left: 10px;">
+                <div class="title_label">
+                    <span>Productos</span><span style="font-size:11px">&nbsp;(@Model.Productos.Count Encontrados)</span>
+                </div>
+                <div style="float: right">
+                    <input type="button" value="    TESTIMONIOS" class="buttonGreen testimonios" onclick="SendTestimonios()" style="height: 32px">
+                </div>
+                <div style="float: right">
+                    <input type="button" value="COMPARAR" class="buttonGreen" onclick="SendCompare()" style="height: 32px">
+                    @Html.Hidden("comp1", 0)
+                    @Html.Hidden("comp2", 0)
+                    @Html.Hidden("comp3", 0)
+                    @Html.Hidden("comp4", 0)
+                    @Html.Hidden("comp5", 0)
+                </div>
+                <div id="div_detail" name="div_detail" class="marr le datatable productos">
+                    @Html.Hidden("newSort", oldSort)
+                    <table id="detailstable" style="border: 0px;">
+                        <thead>
+                            <tr class="ui-widget-header">
+                                <th style="width: 20px"></th>
+                       <th class="@ord_producto ri" nowrap>Producto
+                            <div style="float: right; margin-right: 5px;">
+                                <a href="#" onclick="sendSubmit('nombreAsc');" title="Ordenar Ascendente" class="order_icon">&#x25B2;</a>
+                                <a href="#" onclick="sendSubmit('nombreDesc');" title="Ordenar Descendente" class="order_icon">&#x25BC;</a>
+                            </div>
+                        </th>
+                        <th class="@ord_empresa ri" nowrap width="100px">Empresa
+                            <div style="float: right; margin-right: 5px;">
+                                <a href="#" onclick="sendSubmit('empresaAsc');" title="Ordenar Ascendente" class="order_icon">&#x25B2;</a>
+                                <a href="#" onclick="sendSubmit('empresaDesc');" title="Ordenar Descendente" class="order_icon">&#x25BC;</a>
+                            </div>
+                        </th>
+                        @if (Model.CategoriaIdProductos == 6)
+                        {
+                            <th class="@ord_madurez ri" nowrap width="100px">Madurez
+                        <div style="float: right; margin-right: 5px;">
+                            <a href="#" onclick="sendSubmit('madurezAsc');" title="Ordenar Ascendente" class="order_icon">&#x25B2;</a>
+                            <a href="#" onclick="sendSubmit('madurezDesc');" title="Ordenar Descendente" class="order_icon">&#x25BC;</a>
+                        </div>
+                                </th>
+                        }
+                        else
+                        { 
+                       <th class="@ord_ciclo ri" nowrap width="100px">Ciclo
+                        <div style="float: right; margin-right: 5px;">
+                            <a href="#" onclick="sendSubmit('cicloAsc');" title="Ordenar Ascendente" class="order_icon">&#x25B2;</a>
+                            <a href="#" onclick="sendSubmit('cicloDesc');" title="Ordenar Descendente" class="order_icon">&#x25BC;</a>
+                        </div>
+                                </th>
+                        }
+                                <th class="@ord_altura ri" nowrap width="80px">Altura
+                        <div style="float: right; margin-right: 5px;">
+                            <a href="#" onclick="sendSubmit('alturaAsc');" title="Ordenar Ascendente" class="order_icon">&#x25B2;</a>
+                            <a href="#" onclick="sendSubmit('alturaDesc');" title="Ordenar Descendente" class="order_icon">&#x25BC;</a>
+                        </div>
+                                </th>
+                                <th class="@ord_material ri" nowrap width="100px">Material
+                        <div style="float: right; margin-right: 5px;">
+                            <a href="#" onclick="sendSubmit('materialAsc');" title="Ordenar Ascendente" class="order_icon">&#x25B2;</a>
+                            <a href="#" onclick="sendSubmit('materialDesc');" title="Ordenar Descendente" class="order_icon">&#x25BC;</a>
+                        </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="productList1" name="productList1">
+                            <!--
+                            @{
+                                
+                        foreach (Producto item in Model.Productos)
+                        {
+                            switch (selectAgroup)
+                            {
+                                case "empresa":
+                                    if (selectAgroupAux != item.Empresa || selectAgroupAux == "")
+                                    {
+                                <tr class="agroup_tr">
+                                    <td colspan="6" class="agroup_td">@item.Empresa</td>
+                                </tr> 
+                                        selectAgroupAux = item.Empresa;
+                                    }
+                                    break;
+                                case "nombre":
+                                    if (selectAgroupAux != item.Nombre || selectAgroupAux == "")
+                                    {
+                                <tr class="agroup_tr">
+                                    <td colspan="6" class="agroup_td">@item.Nombre</td>
+                                </tr> 
+                                        selectAgroupAux = item.Nombre;
+                                    }
+                                    break;
+                                case "ciclo":
+                                    if (selectAgroupAux != item.Ciclo || selectAgroupAux == "")
+                                    {
+                                <tr class="agroup_tr">
+                                    <td colspan="6" class="agroup_td">@(item.Ciclo == "" ? "Sin Datos" : item.Ciclo)</td>
+                                </tr> 
+                                        selectAgroupAux = item.Ciclo;
+                                    }
+                                    break;
+                                case "madurez":
+                                    if (selectAgroupAux != item.DiasMadurez.ToString() || selectAgroupAux == "")
+                                    {
+                                <tr class="agroup_tr">
+                                    <td colspan="6" class="agroup_td">@(item.DiasMadurez == 0 ? "Sin Datos" : item.DiasMadurez.ToString())</td>
+                                </tr> 
+                                        selectAgroupAux = item.DiasMadurez.ToString();
+                                    }
+                                    break;
+                                case "altura":
+                                    if (selectAgroupAux != item.AlturaPlanta.ToString() || selectAgroupAux == "")
+                                    {
+                                <tr class="agroup_tr">
+                                    <td colspan="6" class="agroup_td">@(item.AlturaPlanta == 0 ? "Sin Datos" : item.AlturaPlanta.ToString())</td>
+                                </tr> 
+                                        selectAgroupAux = item.AlturaPlanta.ToString();
+                                    }
+                                    break;
+                                case "material":
+                                    if (selectAgroupAux != item.Material || selectAgroupAux == "")
+                                    {
+                                <tr class="agroup_tr">
+                                    <td colspan="6" class="agroup_td">@(item.Material == "" ? "Sin Datos" : item.Material)</td>
+                                </tr> 
+                                        selectAgroupAux = item.Material;
+                                    }
+                                    break;
+
+                            }
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" class="checkboxTable" title="Clickear aquí para agregar este producto a la comparación" id="check_@item.Id" onclick="SaveChkComp('check_@item.Id    ')">
+                                    </td>
+
+                                    @{
+                            string esnuevo = string.Empty;
+                            if (Convert.ToBoolean(item.EsNuevo))
+                            {
+
+                                esnuevo = "esnuevo";
+                            }
+                                    }
+                                    <td class="@esnuevo">
+                                        @Html.Raw(Html.ActionLink(item.Nombre, "Ficha", "Productos", new { id = @item.Id, CategoriaIdProductos = Model.CategoriaIdProductos, BuscarProductos = Model.BuscarProductos }, new { @class = "table_link", @title = "Click aquí para ver la ficha de este producto" }))
+                                    </td>
+
+                                    <td>
+                                        @(item.Empresa == "" ? "-" : item.Empresa)
+                                    </td>
+                                    @if (Model.CategoriaIdProductos == 6)
+                                    { 
+                                        <td>
+                                            @(item.DiasMadurez == 0 ? "-" : item.DiasMadurez.ToString())
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                            @(item.Ciclo == "" ? "-" : item.Ciclo)
+                                        </td>
+                                    }
+                                    <td>
+                                        @(item.AlturaPlanta == 0 ? "-" : item.AlturaPlanta.ToString())
+                                    </td>
+                                    <td>
+                                        @(item.Material == "" ? "-" : item.Material)
+                                    </td>
+
+                                </tr>                    
+                        }
+                            }
+                           -->     
+                        </tbody>
+                    </table>
+                </div>
+
+                <input type="hidden" id=lastRowId name=lastRowId value="0" />
+                <div id="productList">
+                
+                </div>    
+                <div id="loading" style="margin-top: 5px;margin-left: 45%;"><img src="~/Images/fancybox_loading.gif"></div> 
+
+                <div style="clear: both;"></div>
+            </div>
+        </div>
+    }
+    <script src="~/Scripts/resultados.js">
+    </script>
+    <script>
+        
+        //get default articles
+        $(document).ready(function () {
+            
+            $("#lastRowId").val(0);
+            
+            GetArticlesFromNextSection(false);
+
+        });
+
+        //get next articles automatic
+        $(window).scroll(function () {
+            if ($(window).scrollTop() == $(document).height() - $(window).height()) {
+                GetArticlesFromNextSection(true);
+            }
+        });
+
+</script>
+}
+

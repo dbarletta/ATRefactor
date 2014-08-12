@@ -1,0 +1,39 @@
+Tecnología:
+	jQuery
+	jQuery Mobile
+	SQL
+	PHP?
+	Charts (http://therockncoder.blogspot.com.ar/2012/05/jquery-mobile-charts.html)
+		jqPlot para charts
+		Google charts --> https://google-developers.appspot.com/chart/interactive/docs/gallery
+		GraphUp
+		jQuery Visualize
+		Highcharts
+		Flot
+		jQuery Sparklines
+	Sencha?
+	Phonegap?
+	SuveyMonkey para encuestas prelanzamiento
+	Mailchimp para manejar los newsletters
+	
+Historico de precipitaciones, temperaturas, etc.
+	http://www.smn.gov.ar/serviciosclimaticos/?mod=vigilancia&id=14
+	http://www.smn.gov.ar/?mod=agro&id=11
+	
+Definir las regiones de los departamentos de
+	Buenos Aires SE	SO O N	C
+	Santa Fe N C	S
+	Cordoba N	C	S
+	
+2013-09-19
+----------
+TipoDato en tabla Atributos:
+	1 = string
+	2 = integer (Grupo de Calidad 1 a 3 tiene este tipo de dato pero tiene 2 valores con "2 superior" y con GDU en Floracion pasa algo similar)
+	3 = boolean
+	4 = decimal
+	5 = datetime
+	
+2013-11-11
+----------
+Que los desplegables de los filtros se defaulteen con algun valor seleccionado.

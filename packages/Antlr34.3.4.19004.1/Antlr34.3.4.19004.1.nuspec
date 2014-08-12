@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Antlr34</id>
+    <version>3.4.19004.1</version>
+    <title>Antlr34</title>
+    <authors>Terence Parr, Sam Harwell</authors>
+    <owners>Terence Parr, Sam Harwell</owners>
+    <projectUrl>http://www.antlr.org/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>ANTLR, ANother Tool for Language Recognition, is a language tool that provides a framework for constructing recognizers, compilers, and translators from grammatical descriptions containing actions in a variety of target languages.</description>
+    <releaseNotes />
+    <copyright>Copyright 2012</copyright>
+    <language />
+    <references>
+      <reference file="Antlr3.Runtime.dll" />
+    </references>
+  </metadata>
+</package>

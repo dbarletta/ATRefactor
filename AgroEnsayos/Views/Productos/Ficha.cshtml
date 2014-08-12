@@ -1,0 +1,173 @@
+﻿@model AgroEnsayos.Models.SearchModel
+@using AgroEnsayos.Entities;
+@{
+    Empresa empresa = ViewBag.Empresa as Empresa;
+    Producto producto = ViewBag.Producto as Producto;
+
+    List<Atributo> atributos = ViewBag.Atributo as List<Atributo>;
+    int ResEnsayo = ViewBag.EsEnsayo;
+    
+    string rubroAux = "";
+          
+}
+
+    @using (Html.BeginForm("Resultados", "Productos", FormMethod.Post, new { id = "Resultform" }))
+    {
+        <div class="container header header3">
+            <div class="logo2">
+                <a href="/Home/" title="Volver a la Página Principal">
+                    <img src="/images/logo.png" class="logo"></a>
+            </div>
+             <div class="searchrow2">
+                <input type="hidden" value="@Model.CategoriaIdProductos" id="CategoriaIdProductos" name="CategoriaIdProductos">
+                <input data-val="true" data-val-required="Debe escribir algo" id="BuscarProductos" name="BuscarProductos" class="searchtext big" placeholder="Buscar" type="text" value="@Model.BuscarProductos"><input type="submit" class="searchicon" style="margin-right: 50px" value=""><input type="button" class="userbutton" />
+            </div>
+        </div>
+        <div class="container header header3" style="height: 40px;">
+            <div class="breadcrumb" style="float:left">
+                @Html.ActionLink("Cultivos", "Index", "Home")
+                @if (Model.Categoria != null)
+                {
+                    <span>&nbsp;>&nbsp;</span>
+                    @Html.ActionLink(Model.Categoria, "Busqueda/" + Model.CategoriaIdProductos, "Home")
+                }
+                
+                <span>&nbsp;>&nbsp;</span>
+                @if(ResEnsayo==0)
+                {
+                    @Html.ActionLink("Productos", "Resultados", "Productos", new { CategoriaIdProductos= Model.CategoriaIdProductos ,BuscarProductos = Model.BuscarProductos }, null)
+                }
+                else
+                {
+                    @Html.ActionLink("Ensayos", "ResultadosEnsayos", "Ensayos", new { CategoriaIdEnsayos= Model.CategoriaIdProductos ,BuscarEnsayos = Model.BuscarProductos }, null)
+                }
+                    <span>&nbsp;>&nbsp;</span>
+                    @Html.ActionLink(producto.Nombre, "Ficha", "Productos", new { id = producto.Id, CategoriaIdProductos = Model.CategoriaIdProductos, BuscarProductos = Model.BuscarProductos }, new { })
+                
+            </div>
+        </div>
+    }
+    <div class="container header3" style="background-color: #f7f7f7">
+            <div id="div_company" style="float: left; width: 220px;background-color: #f7f7f7;padding-left: 20px;">
+                @if(empresa.Logo != "")
+                {
+                    <div style="padding-top: 20px;"><img src="../../images/logos/@empresa.Logo" height="75" width="200" /></div>
+                }
+                else
+                {
+                    <div style="padding-top: 20px;"><img src="../../images/logos/logo_blank.png" height="75" width="200" /></div>
+                }
+                <div style="font-weight:bold;padding-top:10px;">@empresa.Nombre</div>
+                <div>@empresa.Domicilio</div>
+                <div>@empresa.CodigoPostal</div>
+                <div>@empresa.Localidad</div>
+                <div>@empresa.Pais</div>
+                <div>Tel: @empresa.Telefono</div>
+                <div>Fax: @empresa.Fax</div>
+                <div><a href="mailto:@empresa.Email">@empresa.Email</a></div>
+            </div>
+            <div id="div_product" style="float: left; background-color: #ffffff; width: 700px; padding-left: 10px;">
+              <div class="title_label" style="background-color: #f7f7f7;width: 640px;padding: 20px;margin-bottom: 20px;">
+                  <div><span>@producto.Nombre</span></div>
+                  <div style="font-size: 14px;"><span>@empresa.Nombre @producto.Categoria</span></div>
+              </div>
+
+              <table id="detailstable" style="width: 60%; border: 0px;margin: 20px;">
+            <tbody>
+                <tr>
+                    <td>Material:</td>
+                    <td>@producto.Material</td>
+                </tr>
+                <tr>
+                    <td>Hibrido:</td>
+                    <td>@if (Convert.ToBoolean(producto.EsHibrido)) 
+                        { 
+                            <span>Si</span> 
+                        } 
+                        else 
+                        { 
+                            <span>No</span> 
+                        }</td>
+                </tr>
+                <tr>
+                    @if (Model.CategoriaIdProductos == 6 || Model.CategoriaIdEnsayos == 6)
+                    {
+                        <td>Madurez:</td>
+                        <td>@producto.DiasMadurez Dias</td>
+                    }
+                    else
+                    { 
+                        <td>Ciclo:</td>
+                        <td>@producto.Ciclo</td>
+                    }
+                </tr>
+                <tr>
+                    <td>Altura:</td>
+                    <td>@producto.AlturaPlanta</td>
+                </tr>
+
+                @if (atributos.Count > 0)
+                {
+                    foreach (Atributo atr in atributos)
+                    {
+                        if (rubroAux != atr.Rubro)
+                        {
+                            rubroAux = atr.Rubro;
+                            <tr><td><br/></td></tr>
+                            <tr><td colspan="2"><div class="title_label" style="margin-top: 0px;font-size: 14px;">@rubroAux</div></td></tr>
+                        }
+                        <tr>
+                            <td>@atr.Nombre:</td>
+                            @if(atr.TipoDato == 3)
+                            {
+                                if(atr.equivalencia_valor == "0")
+                                { <td>No</td> }
+                                else
+                                { <td>Si</td> }
+                            }
+                            else
+                            {
+                            <td>@atr.equivalencia_valor</td>
+                            }
+                        </tr>
+                    } 
+                }
+                
+            </tbody>
+            </table>             
+              <div style="clear: both;"></div>
+                <div style="padding-left:20px"><span style="font-weight:bold">* Para mas información, remitase al sitio web de la empresa semillera.</span></div>  
+              <div style="clear: both;"></div>
+              <div id="botonera" style="padding-left:20px">  
+                  <div style="float:left">
+                      <input type="button" value="SEGUIR" class="buttonGreen" style="height: 30px;width:140px">
+                  </div>
+                  <div style="float:left">
+                      <input type="button" value="VER ENSAYOS" onclick="sendEnsayos();" class="buttonGreen" style="height: 30px;width:140px">
+                  </div>
+                  <div style="float:left">
+                      <input type="button" value="ZONAS DE USO" class="buttonGreen" style="height: 30px;width:140px">
+                  </div>
+                  <div style="float:left">
+                      <input type="button" value="COMPARAR" class="buttonGreen" style="height: 30px;width:140px">
+                  </div>
+              </div>
+            <div style="clear: both;"></div>
+        </div>
+        </div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        if ($("#div_product").height() > $("#div_company").height()) {
+            $("#div_company").height($("#div_product").height());
+        }else{
+            $("#div_product").height($("#div_company").height());
+        }
+    });
+
+    function sendEnsayos()
+    {
+       window.location.href = "@Html.Raw(Url.Action("ResultadosEnsayos", "Ensayos", new { CategoriaIdEnsayos = producto.CategoriaId , ProductoId=producto.Id , BuscarEnsayos=producto.Nombre }))";
+    }
+</script>

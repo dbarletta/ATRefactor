@@ -1,0 +1,143 @@
+﻿@{
+    Layout = "/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row" ng-app="APP">
+    <div class="col-lg-12" ng-controller="ProductosCtrl" style="width:100%;">
+
+        <h2>Productos</h2>
+        
+        <div class="alert alert-warning alert-dismissable" ng-show="productToDelete != null">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            <strong>Advertencia!</strong> Esta seguro que desea eliminar el Producto: <strong>{{productToDelete.nombre}}</strong>?
+            <br />
+            <a href="" class="alert-link" ng-click="deleteProduct()">Confirmar </a>
+            <a href="" class="alert-link" ng-click="productToDelete = null">Cancelar</a>
+        </div>
+
+        <div>
+            <label>Categoría: </label>
+            <select ng-model="categoriaId" ng-change="getProductos()">
+                <option ng-repeat="c in categorias" value="{{c.id}}" ng-selected="c.id == 4">{{c.nombre}}</option>
+            </select>
+            <img id="loadingCategory" src="/images/fancybox_loading.gif" />
+        </div>
+
+        <br />
+
+        <button id="btnAdd" class="btn btn-sm btn-success" ng-click="addProduct()">Nuevo Producto</button>
+
+        <div class="input-append" style="float:right">
+            <input ng-model="search" class="input-medium search-query" placeholder="Search" />
+            <span class="glyphicon glyphicon-search" style="left:-25px;"></span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-nowrap table-sortable">
+                <thead>
+                    <tr>
+                        <th colspan="4">Acciones</th>
+                        <th ng-click="sortBy('id')">Id</th>
+                        <th ng-click="sortBy('categoria')">Categoria</th>
+                        <th ng-click="sortBy('empresa')">Empresa</th>
+                        <th ng-click="sortBy('nombre')">Nombre</th>
+                        <th ng-click="sortBy('descripcionPG')">Descripcion</th>
+                        <th ng-click="sortBy('material')">Material</th>
+                        <th ng-click="sortBy('ciclo')">Ciclo</th>
+                        <th ng-click="sortBy('diasFloracion')">Dias De Floracion</th>
+                        <th ng-click="sortBy('diasMadurez')">Dias De Madurez</th>
+                        <th ng-click="sortBy('alturaPlanta')">Altura</th>
+                        <th ng-click="sortBy('esHibrido')">Hibrido</th>
+                        <th ng-click="sortBy('esConvencional')">Convencional</th>
+                        <th ng-click="sortBy('esNuevo')">Nuevo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-show="selectedProduct.id ==0 ">
+                        <td><a class="btn btn-default btn-sm" ng-click="saveProduct(true)">Guardar</a></td>
+                        <td colspan="3"><a class="btn btn-default btn-sm" ng-click="cancelAdd()">Cancelar</a></td>
+                        <td></td>
+                        <td><select ng-model="selectedProduct.categoriaId" ng-options="c.id as c.nombre for c in categorias"><option value="">-Seleccione Categoría-</option></select></td>
+                        <td><select ng-model="selectedProduct.empresaId" ng-options="e.id as e.nombre for e in empresas"><option value="">-Seleccione Empresa-</option></select></td>
+                        <td><input ng-model="selectedProduct.nombre" type="text" placeholder="Nombre del producto" /></td>
+                        <td><input ng-model="selectedProduct.descripcionPG" type="text" placeholder="Ingresé una descripción" /></td>
+                        <td><input ng-model="selectedProduct.material" type="text" placeholder="Material base" /></td>
+                        <td><input ng-model="selectedProduct.ciclo" type="text" placeholder="Ciclo" /></td>
+                        <td><input ng-model="selectedProduct.diasFloracion" type="number" placeholder="Días de floración" /></td>
+                        <td><input ng-model="selectedProduct.diasMadurez" type="number" placeholder="Días de madurez" /></td>
+                        <td><input ng-model="selectedProduct.alturaPlanta" type="number" placeholder="Altura de la planta" /></td>
+                        <td><input ng-model="selectedProduct.esHibrido" type="checkbox" /></td>
+                        <td><input ng-model="selectedProduct.esConvencional" type="checkbox" /></td>
+                        <td><input ng-model="selectedProduct.esNuevo" type="checkbox" /></td>
+                    </tr>
+
+                    <tr ng-repeat="p in productos | filter:search| orderBy:orderby:reverse">
+                        <td><p class="btn btn-danger btn-sm" ng-click="promptDelete(p)" ng-show="p.id != selectedProduct.id">Eliminar</p><p class="btn btn-default btn-sm" ng-show="p.id == selectedProduct.id" ng-click="saveProduct(false)">Guardar</p></td>
+                        <td><p class="btn btn-primary btn-sm" ng-click="editProduct(p)" ng-show="p.id != selectedProduct.id">Editar</p><p class="btn btn-default btn-sm" ng-show="p.id == selectedProduct.id" ng-click="cancelEdit(p)">Cancelar</p></td>
+                        <td><a class="link" ng-click="editAttributes(p)" ng-show="p.id != selectedProduct.id"><b>Atributos</b></a></td>
+                        <td><a class="link" ng-click="editZones(p)" ng-show="p.id != selectedProduct.id"><b>Zonas</b></a></td>
+                        <td>
+                            <label>{{p.id}}</label>
+                        </td>
+                        <td>
+                            <label ng-show="p.id != selectedProduct.id">{{p.categoria}}</label>
+                            <select ng-model="p.categoriaId" ng-show="p.id == selectedProduct.id" ng-options="c.id as c.nombre for c in categorias"></select>
+                        </td>
+                        <td>
+                            <label ng-show="p.id != selectedProduct.id">{{p.empresa}}</label>
+                            <select ng-model="p.empresaId" ng-show="p.id == selectedProduct.id" ng-options="e.id as e.nombre for e in empresas"></select>
+                        </td>
+                        <td>
+                            <label ng-show="p.id != selectedProduct.id">{{p.nombre}}</label>
+                            <input ng-model="p.nombre" ng-show="p.id == selectedProduct.id" />
+                        </td>
+                        <td>
+                            <label ng-show="p.id != selectedProduct.id" class="column-ellipsis" title="{{p.descripcionPG}}">{{p.descripcionPG}}</label>
+                            <input ng-model="p.descripcionPG" ng-show="p.id == selectedProduct.id" />
+                        </td>
+                        <td>
+                            <label ng-show="p.id != selectedProduct.id">{{p.material}}</label>
+                            <input ng-model="p.material" ng-show="p.id == selectedProduct.id" />
+                        </td>
+                        <td>
+                            <label ng-show="p.id != selectedProduct.id" title="{{p.ciclo}}">{{p.ciclo}}</label>
+                            <input ng-model="p.ciclo" ng-show="p.id == selectedProduct.id" />
+                        </td>
+                        <td>
+                            <label ng-show="p.id != selectedProduct.id">{{p.diasFloracion}}</label>
+                            <input ng-model="p.diasFloracion" ng-show="p.id == selectedProduct.id" />
+                        </td>
+                        <td>
+                            <label ng-show="p.id != selectedProduct.id">{{p.diasMadurez}}</label>
+                            <input ng-model="p.diasMadurez" ng-show="p.id == selectedProduct.id" />
+                        </td>
+                        <td>
+                            <label ng-show="p.id != selectedProduct.id">{{p.alturaPlanta}}</label>
+                            <input ng-model="p.alturaPlanta" ng-show="p.id == selectedProduct.id" />
+                        </td>
+                        <td>
+                            <input ng-show="p.id != selectedProduct.id" type="checkbox" disabled="disabled" ng-model="p.esHibrido" />
+                            <input ng-model="p.esHibrido" ng-show="p.id == selectedProduct.id" type="checkbox" />
+                        </td>
+                        <td>
+                            <input ng-show="p.id != selectedProduct.id" type="checkbox" disabled="disabled" ng-model="p.esConvencional" />
+                            <input ng-model="p.esConvencional" ng-show="p.id == selectedProduct.id" type="checkbox" />
+                        </td>
+                        <td>
+                            <input ng-show="p.id != selectedProduct.id" type="checkbox" disabled="disabled" ng-model="p.esNuevo" />
+                            <input ng-model="p.esNuevo" ng-show="p.id == selectedProduct.id" type="checkbox" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div id="popupZones" style=" width:450px; min-height:500px; display:none;">
+    <img class="loading" src="../../images/fancybox_loading.gif" style="margin: auto" />
+    <div class="container" style="width: 450px;  margin: 0 auto;"></div>
+</div>
+
+<div id="popupAttributes" style="display: none;  min-height:500px;">
+    <img class="loading" src="../../images/fancybox_loading.gif" style="margin: auto" />
+    <div class="container" style="min-width: 310px; margin: 0 auto"></div>
+</div>

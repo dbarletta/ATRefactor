@@ -1,0 +1,17 @@
+﻿@using AgroEnsayos.Entities;
+@{
+    List<Producto> items = ViewBag.Productos as List<Producto>; 
+}
+<ul>
+    @{
+        if (items != null)
+        {
+            foreach (Producto item in items)
+            {
+        <li>@item.Nombre</li>
+            }
+        }
+    }
+
+</ul>
+

@@ -1,0 +1,74 @@
+﻿@using AgroEnsayos.Entities;
+@{
+    ViewBag.Title = "Seleccione cultivo";
+    List<Categoria> items = ViewBag.Categorias as List<Categoria>;
+
+    List<int> userCategorias = ViewBag.UserCategorias as List<int>;
+    
+    ViewBag.CategoriaId = 0;
+}
+
+@section featured {
+    <section>
+        <div class="container header header2" style="width: 790px">
+            <img src="/images/logo.png" class="logo" />
+        </div>
+        <div style="margin: auto; width: 790px">
+            <div style="float: left">
+                <div class="container header2 titlerow">
+                    <div class="subtitle">Seleccione semilla</div>
+                    <div class="dropdown">
+                        <img src="/images/dd.png" />
+                    </div>
+                </div>
+
+                @{
+                    if (items != null)
+                    {
+                        foreach (Categoria item1 in items.Where(x => x.Padre == "Semillas"))
+                        {
+                            int i = userCategorias.Find(item => item == item1.Id);
+                            if (i != 0)
+                            {
+                    <div class="container row" onclick="window.location.href='/Home/Busqueda/@item1.Id';">
+                        <div class="rowcontent">@item1.Nombre.ToUpper()</div>
+                    </div>
+                            }
+                        }
+                    }
+                }
+            </div>
+            <div style="float: left; margin-left: 20px;">
+                <div class="container header2 titlerow">
+                    <div class="subtitle">Seleccione fitosanitario</div>
+                    <div class="dropdown">
+                        <img src="/images/dd.png" />
+                    </div>
+                </div>
+                @{
+                    if (items != null)
+                    {
+                        foreach (Categoria item1 in items.Where(x => x.Padre == "Fitosanitarios"))
+                        {
+                            int i = userCategorias.Find(item => item == item1.Id);
+                            if(i!=0)
+                            {
+                    <div class="container row" onclick="window.location.href='/Home/Busqueda/@item1.Id';">
+                        <div class="rowcontent">@item1.Nombre.ToUpper()</div>
+                    </div>
+                            }
+                        }
+                    }
+                }
+
+                <div class="container row" style="margin-top: 51px" onclick="window.location.href='/Home/Busqueda/12';">
+                    <div class="rowcontent">INOCULANTES Y ADITIVOS</div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+
+
+

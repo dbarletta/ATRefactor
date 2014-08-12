@@ -1,0 +1,102 @@
+﻿@{
+    int Producto=0;
+    Boolean bImg = false;
+    if (Model != null)
+    {
+        if (Model.CategoriaIdProductos!=0)
+        {  
+            Producto = Model.CategoriaIdProductos;
+        }
+        if (Model.CategoriaIdEnsayos != 0)
+        {
+            Producto = Model.CategoriaIdEnsayos;
+        }
+    }  
+ }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title - Agrotool</title>
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/jqueryval")
+
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" href="~/Content/ap.css" type="text/css" media="screen" />
+    <link href="~/Content/jquery.fancybox.css" rel="stylesheet" />
+    <link href="~/Content/ErrorPopUp.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container" id="login">
+        @Html.Partial("_LoginPartial")
+    </div>
+    <div id="body">
+        @RenderSection("featured", required: false)
+        <section>
+            @RenderBody()
+        </section>
+        
+    </div>
+    <script src="/Scripts/jquery.backstretch.min.js"></script>
+        
+    @if (ViewBag.CategoriaId == 6 || Producto == 6) // Soja
+    {
+        bImg=true;
+        <script>$.backstretch("/images/fondo3.jpg");</script>
+    }
+    @if (ViewBag.CategoriaId == 3 || Producto == 3) // Maiz
+    {
+        bImg = true;
+        <script>$.backstretch("/images/fondo4.jpg");</script>
+    }
+    @if (ViewBag.CategoriaId == 4 || Producto==4) //Trigo
+    {
+        bImg = true;
+        <script>$.backstretch("/images/fondo5.jpg");</script>
+    }
+    @if (ViewBag.CategoriaId == 5 || Producto == 5)
+    {
+        bImg = true;
+        <script>$.backstretch("/images/fondo2.jpg");</script>
+    }                
+    @if (!bImg) // Ninguna
+    {
+    <script src="/Scripts/supersized.3.2.7.min.js"></script>
+    <script>
+        jQuery(function ($) {
+            $('input, textarea').placeholder();
+            
+            $.supersized({
+
+                // Functionality
+                slide_interval: 30000,		// Length between transitions
+                transition: 1, 			// 0-None, 1-Fade, 2-Slide Top, 3-Slide Right, 4-Slide Bottom, 5-Slide Left, 6-Carousel Right, 7-Carousel Left
+                transition_speed: 700,		// Speed of transition
+                random: 1,
+
+                // Components							
+                slide_links: false,	// Individual links for each slide (Options: false, 'num', 'name', 'blank')
+
+                slides: [{ image: '/images/fondo2.jpg' }, { image: '/images/fondo3.jpg' },{ image: '/images/fondo4.jpg' },{ image: '/images/fondo5.jpg' } ] 
+                
+            });
+               
+        });
+        
+    </script>
+    }  
+    
+    <script src="~/Scripts/jquery.fancybox.pack.js"></script>
+    <script src="~/Scripts/jquery.placeholder.min.js" type="text/javascript"></script>
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

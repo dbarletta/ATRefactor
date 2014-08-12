@@ -1,0 +1,74 @@
+﻿
+<!--Excepción Predefinida-->
+<div id="generic-exception" title="Error" class="fancyboxcontainer le" >
+    <div class="msg-exception msg-exception-popup">
+        <hgroup>
+            <h1>Error en el servidor</h1>
+            <h2>Ocurrió un error procesando su solicitud</h2>
+        </hgroup>
+        <p id="generic-exception-message">
+            Por favor, intente nuevamente en unos momentos.
+            <br />Si el problema persiste contacte con un administrador, informándole las acciones que hayan derivado en este error.
+            <br />Tenga a bien referirle al administrador la fecha y hora en que haya recibido el último error, para poder investigar los logs del sistema.
+            <br />Disculpe las molestias ocasionadas,
+            <br /><br />
+        </p>
+        <span> El equipo de AgroTool.</span>
+    </div>
+</div>
+
+<!--Excepción Angular-->
+<div id="angular-exception" title="Error" class="fancyboxcontainer le" >
+    <div id="userMsg" class="msg-exception msg-exception-popup">
+        <hgroup>
+            <h1>Error en el servidor</h1>
+            <h2>Ocurrió un error procesando su solicitud</h2>
+        </hgroup>
+        <p id="generic-exception-message">
+            Por favor, intente nuevamente en unos momentos.
+            <br />Si el problema persiste contacte con un administrador, informándole las acciones que hayan derivado en este error.
+            <br />Tenga a bien referirle al administrador la fecha y hora en que haya recibido el último error, para poder investigar los logs del sistema.
+            <br />Disculpe las molestias ocasionadas,
+            <br /><br />
+        </p>
+        <a href="javascript:changeToTechView()">detalle técnico</a>
+        <span> El equipo de AgroTool.</span>
+    </div>
+    <div id="itMsg" class="msg-exception-it">
+        <a href="javascript:changeToUserView()">volver</a>
+        <hgroup>
+            <h2>Información tecnica</h2>
+        </hgroup>
+        <div>
+            <p>
+                <b>Status Code: </b><span id="statusCode"></span>
+            </p>
+            <p>
+                <b>Status Text: </b><span id="statusText"></span>
+            </p>
+            <p>
+                <b>Exception Type: </b><span id="exType"></span>
+            </p>
+            <p>
+                <b>Exception Message: </b><span id="exMessage"></span>
+            </p>
+            <p>
+                <b>Message: </b><span id="message"></span>
+            </p>
+            <div style="max-height:40px; max-width:350px;">
+                <textarea disabled id="stacktrace"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function changeToTechView() {
+        $('#userMsg').hide();
+        $('#itMsg').show();
+    }
+    function changeToUserView() {
+        $('#itMsg').hide();
+        $('#userMsg').show();
+    }
+</script>

@@ -1,0 +1,25 @@
+﻿@{
+    Layout = "";
+}
+<style>
+    .datatable.editable input[type="text"] { margin-bottom: auto; width: auto; height: auto; }
+    .datatable.editable a { cursor: pointer; }
+    .buttonGreen { height: auto; }
+    .fancybox-inner { overflow-y: scroll !important; }
+    .zonas { text-align: left; margin-left: 20px; }
+</style>
+
+<div>
+    <div ng-controller="ProductoLugaresCtrl">
+        <h2 ng-model="Nombre">Lugares de: {{nombre}} </h2>
+        <br />
+
+        <div>
+            <div ng-repeat="pl in productoLugares" >
+                <input ng-model="pl.isChecked" id="{{pl.LugarId}}" type="checkbox" /> {{pl.region}} 
+            </div>
+       </div>
+        <br />
+        <button type="button" class="btn btn-sm btn-success" ng-click="saveLugares()">Guardar</button>
+    </div>
+</div>

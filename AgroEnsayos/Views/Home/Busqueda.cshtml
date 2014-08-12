@@ -1,0 +1,43 @@
+﻿@model AgroEnsayos.Models.SearchModel
+@{
+    ViewBag.Title = "Busque ensayos o productos";
+}
+
+@section featured {
+    <section>
+        <div class="container header header2">
+            <a href="/Home/" title="Volver a la Página Principal">
+                <img src="/images/logo.png" class="logo" /></a>
+        </div>
+
+        <div class="container header2 titlerow">
+            <div class="subtitle medium">Ensayos vinculados</div>
+        </div>
+        <div class="container header2" style="padding-bottom: 10px;">
+            @using (Html.BeginForm("ResultadosEnsayos", "Ensayos", FormMethod.Post))
+            {
+            <div class="searchrow">
+                <input type="hidden" value="@ViewBag.CategoriaId" id="CategoriaIdEnsayos" name="CategoriaIdEnsayos">
+                <input data-val="true" data-val-required="Debe escribir algo" id="BuscarEnsayos" class="searchtext" name="BuscarEnsayos" placeholder="Buscar por empresa, producto, localidad" type="text" value=""><input type="submit" class="searchicon" value="">
+            </div>
+            }
+        </div>
+        <div style="height: 10px"></div>
+        <div class="container header2 titlerow">
+            <div class="subtitle medium">Productos vinculados</div>
+        </div>
+        <div class="container header2" style="padding-bottom: 10px;">
+             @using (Html.BeginForm("Resultados", "Productos", FormMethod.Post))
+            {
+            <div class="searchrow">
+                <input type="hidden" value="@ViewBag.CategoriaId" id="CategoriaIdProductos" name="CategoriaIdProductos">
+                <input data-val="true" data-val-required="Debe escribir algo" id="BuscarProductos" class="searchtext" name="BuscarProductos" placeholder="Buscar por nombre, empresa, atributos " type="text" value=""><input type="submit" class="searchicon" value="">
+            </div>
+             }
+        </div>
+
+    </section>
+}
+
+
+

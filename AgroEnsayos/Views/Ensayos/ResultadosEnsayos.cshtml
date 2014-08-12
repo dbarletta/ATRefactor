@@ -1,0 +1,558 @@
+﻿@model AgroEnsayos.Models.SearchModel
+@using AgroEnsayos.Entities;
+@using AgroEnsayos.Helpers;
+@{
+    List<Atributo> filtros = ViewBag.Filtros as List<Atributo>;
+    List<String> localidad = ViewBag.Localidades as List<String>;
+    List<String> provincia = ViewBag.Provincias as List<String>;
+    List<Campana> campana = ViewBag.Campanas as List<Campana>;
+    List<String> fuente = ViewBag.Fuentes as List<String>;
+
+    List<Empresa> empresas = ViewBag.Empresas as List<Empresa>;
+
+    string oldSort = ViewBag.OldSort as string;
+    string selectAgroup = ViewBag.SelectAgroup as string;
+    string selectAgroupAux = "";
+
+    List<string> list_filters = ViewBag.list_filters as List<string>;
+    int i_fil = 0;
+
+    string auxRubro = "";
+    string auxNombre = "";
+    string auxRubro_ultimo = "";
+    List<Atributo> auxFiltro = new List<Atributo>();
+
+    Dictionary<string, List<string>> dicStr = new Dictionary<string, List<string>>();
+    Dictionary<string, List<string>> dicStrFil = new Dictionary<string, List<string>>();
+
+    string strNombre = "";
+    string strNombre_aux = "";
+    string strId = "";
+    string strValor = "";
+    string strId1 = "";
+    string strValor1 = "";
+    int tam = 0;
+    int tam_aux = 0;
+    string strFilterFor = "";
+
+    string ord_campana = "";
+    string ord_fuente = "";
+    string ord_producto = "";
+    string ord_provincia = "";
+    string ord_localidad = "";
+    string ord_rinde = "";
+
+    int i_atr = 0;
+    
+    if (oldSort.IndexOf("campana") >= 0)
+    {
+        ord_campana = "ord_selected";
+    }
+    if (oldSort.IndexOf("fuente") >= 0)
+    {
+        ord_fuente = "ord_selected";
+    }
+    if (oldSort.IndexOf("producto") >= 0)
+    {
+        ord_producto = "ord_selected";
+    }
+    if (oldSort.IndexOf("provincia") >= 0)
+    {
+        ord_provincia = "ord_selected";
+    }
+    if (oldSort.IndexOf("localidad") >= 0)
+    {
+        ord_localidad = "ord_selected";
+    }
+    if (oldSort.IndexOf("rinde") >= 0)
+    {
+        ord_rinde = "ord_selected";
+    }
+    
+              
+}
+@section featured {
+
+    @using (Html.BeginForm("ResultadosEnsayos", "Ensayos", FormMethod.Post, new { id = "Resultform" }))
+    {
+        <div class="container header header3">
+            <div class="logo2">
+                <a href="/Home/" title="Volver a la Página Principal">
+                    <img src="/images/logo.png" class="logo"></a>
+            </div>
+            <div class="searchrow2">
+                <input type="hidden" value="@Model.CategoriaIdEnsayos" id="CategoriaIdEnsayos" name="CategoriaIdEnsayos">
+                <input data-val="true" data-val-required="Debe escribir algo" id="BuscarEnsayos" name="BuscarEnsayos" class="searchtext big" placeholder="Buscar" type="text" value="@Model.BuscarEnsayos"><input type="submit" class="searchicon" style="margin-right: 50px" value=""><input type="button" class="userbutton" />
+            </div>
+        </div>
+        <div class="container header header3" style="height: 40px;">
+            <div class="breadcrumb" style="float: left">
+                @Html.ActionLink("Cultivos", "Index", "Home")
+                @if (Model.Categoria != null)
+                {
+                    <span>&nbsp;>&nbsp;</span>
+                    @Html.ActionLink(Model.Categoria, "Busqueda/" + Model.CategoriaIdEnsayos, "Home")
+                }
+            </div>
+            <div class="styled-select" style="float: right; margin-top: 2px;">
+                <span>Agrupar por:</span>
+                @Html.Hidden("h_select_agroup", selectAgroup)
+                @Html.Hidden("h_select_agroup_aux", "")
+                <select id="select_agroup" name="select_agroup" class="select_agroup" onchange="AgroupSubmit(this);">
+                    <option value=""></option>
+                    <option value="campana">Campaña</option>
+                    <option value="fuente">Fuente</option>
+                    <option value="producto">Producto</option>
+                    <option value="provincia">Provincia</option>
+                    <option value="localidad">Localidad</option>
+                </select>
+            </div>
+        </div>
+        <div class="container header3" style="background-color: #f7f7f7">
+            <div id="div_filter" style="float: left; width: 240px; background-color: #f7f7f7;">
+                <input type="hidden" id="remove_id_filter" name="remove_id_filter" value="">
+
+                <input type="hidden" id="new_id_filter" name="new_id_filter" value="">
+                <input type="hidden" id="new_val_filter" name="new_val_filter" value="">
+                <input type="hidden" id="new_name_filter" name="new_name_filter" value="">
+
+                @if (list_filters != null && list_filters.Count > 0)
+                {
+                    <div class="apply-filters" style="width:205px;"><span>Filtros Aplicados</span>
+                            <input value="&nbsp;" class="input_todo" id="del_todo" name="del_todo" type="button" title="Eliminar Filtros" onclick="removeFilter(9999)"  />
+                    </div>
+                    foreach (string strFilter in list_filters)
+                    {
+                        tam = strFilter.IndexOf("--");
+                        strNombre = strFilter.Substring(0, tam);
+
+                        tam_aux = tam + 2;
+                        tam = strFilter.IndexOf("--", tam_aux);
+                        strId = strFilter.Substring(tam_aux, tam - tam_aux);
+
+                        tam_aux = tam + 2;
+                        strValor = strFilter.Substring(tam_aux);
+
+                        if (strNombre_aux == "")
+                        {
+                            strNombre_aux = strNombre;
+                            dicStrFil.Add(strNombre_aux, new List<string>());
+                        }
+
+                        if (strNombre == strNombre_aux)
+                        {
+                            dicStrFil[strNombre_aux].Add(strId + "--" + strValor);
+                        }
+                        else
+                        {
+                    <div class='apply-filter'>
+                        <span style="margin-bottom: 10px;"><b>@strNombre_aux.ToString()</b></span>
+                        @foreach (string str in dicStrFil[strNombre_aux])
+                        {
+                            tam = str.IndexOf("--");
+                            strId1 = str.Substring(0, tam);
+
+                            tam_aux = tam + 2;
+                            strValor1 = str.Substring(tam_aux);
+                            strFilterFor = strNombre_aux + "--" + strId1 + "--" + strValor1;
+                            <div class="div_filter">
+                                <input value="&nbsp;" class="input_fil" id="del_@i_fil.ToString()" name="del_@i_fil.ToString()" type="button" title="Borrar Filtro" onclick="removeFilter(@i_fil)"  />
+                                <span>@strValor1.ToString()</span>
+                                <input type="hidden" id="list_filters" name="list_filters" value="@strFilterFor.ToString()">
+                            </div>
+                            i_fil++;
+                        }
+                    </div>
+                        dicStrFil.Clear();
+                        dicStrFil.Add(strNombre, new List<string>());
+                        dicStrFil[strNombre].Add(strId + "--" + strValor);
+                        }
+                        strNombre_aux = strNombre;
+                    }
+                    if (dicStrFil.Count > 0)
+                    {
+                    <div class='apply-filter' style="margin-bottom: 5px;">
+                        <span><b>@strNombre_aux.ToString()</b></span>
+                        @foreach (string str in dicStrFil[strNombre_aux])
+                        {
+                            tam = str.IndexOf("--");
+                            strId = str.Substring(0, tam);
+
+                            tam_aux = tam + 2;
+                            strValor = str.Substring(tam_aux);
+                            strFilterFor = strNombre_aux + "--" + strId + "--" + strValor;
+                            <div class="div_filter">
+                                <input value="&nbsp;" class="input_fil" id="del_@i_fil.ToString()" name="del_@i_fil.ToString()" type="button" title="Borrar Filtro" onclick="removeFilter(@i_fil)"  />
+                                <span>@strValor.ToString()</span>
+                                <input type="hidden" id="list_filters" name="list_filters" value="@strFilterFor.ToString()">
+                            </div>
+                            i_fil++;
+                        }
+                    </div>
+                        i_fil = 0;
+                    }
+                }
+                <!-- Filtro de Empresa, Nuevo (o no) y ubicacion -->
+                <div class='block-filters'>
+                    <dl>
+                        <!-- dt onclick="MostrarDt(this);">&nbsp;</!-->
+                        <dd>
+                            <ol>
+                                <li>
+                                    <a href="javaScript:void(0);" onclick="OpenValues('val_empresa');">Empresa</a>
+                                    <div id="val_empresa" style="display: none; padding: 20px 0 0 10px;">
+                                        @if (empresas != null)
+                                        {
+                                            i_atr=0;
+                                            foreach (Empresa e in empresas)
+                                            {
+                                                <a style="width:180px" id="fil_empresa_@i_atr" name="fil_empresa_@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_empresa_','Empresa','@i_atr','@e.Id');">@e.Nombre</a>
+                                                i_atr++;
+                                            }
+                                        }
+                                    </div>
+                                </li>
+                                <li>
+                                    <a href="javaScript:void(0);" onclick="OpenValues('val_fuente');">Fuente</a>
+                                    <div id="val_fuente" style="display: none; padding: 20px 0 0 10px;">
+                                        @if (fuente != null)
+                                        {
+                                            i_atr=0;
+                                            foreach (String l in fuente)
+                                            {
+                                                <a style="width:180px" id="fil_fuente_@i_atr" name="fil_fuente_@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_fuente_','Fuente','@i_atr','@l');">@l</a>
+                                                i_atr++;
+                                            }
+                                        }
+                                    </div>
+                                </li>
+                                <li>
+                                    <a href="javaScript:void(0);" onclick="OpenValues('val_provincia');">Provincia</a>
+                                    <div id="val_provincia" style="display: none; padding: 20px 0 0 10px;">
+                                        @if (provincia != null)
+                                        {
+                                            i_atr=0;
+                                            foreach (String l in provincia)
+                                            {
+                                                <a style="width:180px" id="fil_provincia_@i_atr" name="fil_provincia_@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_provincia_','Provincia','@i_atr','@l');">@l</a>
+                                                i_atr++;
+                                            }
+                                        }
+                                    </div>
+                                </li>
+                                <li>
+                                    <a href="javaScript:void(0);" onclick="OpenValues('val_localidad');">Localidad</a>
+                                    <div id="val_localidad" style="display: none; padding: 20px 0 0 10px;">
+                                        @if (localidad != null)
+                                        {
+                                            i_atr=0;
+                                            foreach (String l in localidad)
+                                            {
+                                                <a style="width:180px" id="fil_localidad_@i_atr" name="fil_localidad_@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_localidad_','Localidad','@i_atr','@l');">@l</a>
+                                                i_atr++;
+                                            }
+                                        }
+                                    </div>
+                                </li>
+                                <li>
+                                    <a href="javaScript:void(0);" onclick="OpenValues('val_campana');">Campaña</a>
+                                    <div id="val_campana" style="display: none; padding: 20px 0 0 10px;">
+                                        @if (campana != null)
+                                        {
+                                            i_atr=0;
+                                            foreach (Campana l in campana)
+                                            {
+                                                <a style="width:180px" id="fil_campana_@i_atr" name="fil_campana_@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_campana_','Campana','@i_atr','@l.CategoriaId');">@l.Nombre</a>
+                                                i_atr++;
+                                            }
+                                        }
+                                    </div>
+                                </li>
+                            </ol>
+                        </dd>
+                    </dl>
+                </div>
+
+
+                @foreach (Atributo oArt in filtros)
+                {
+                    if (auxRubro == "")
+                    {
+                        auxRubro = oArt.Rubro;
+                    }
+
+                    if (oArt.Rubro == auxRubro)
+                    {
+                        auxRubro_ultimo = oArt.Rubro;
+                        if (oArt.Nombre != auxNombre)
+                        {
+                            auxNombre = oArt.Nombre;
+
+                            dicStr.Add(auxNombre, new List<string>());
+
+
+                            auxFiltro.Add(oArt);
+                        }
+                        dicStr[auxNombre].Add(oArt.equivalencia_valor);
+
+                    }
+                    else
+                    {
+                    <div class='block-filters'>
+                        <dl>
+                            <dt onclick="MostrarDt(this);">@auxRubro</dt>
+                            <dd>
+                                <ol>
+                                    @foreach (Atributo Atr in auxFiltro)
+                                    {
+                                        i_atr = 0;
+                                        <li>
+                                            <a href="javaScript:void(0);" onclick="OpenValues('val_@Atr.Id');">@Atr.Nombre</a>
+                                            <div id="val_@Atr.Id" style="display:none;padding: 20px 0 0 10px;">
+                                                @foreach (string str in dicStr[Atr.Nombre])
+                                                {
+                                                    if (str.ToString() != "")
+                                                    {
+                                                        <a style="width:180px" id="fil_@Atr.Id@i_atr" name="fil_@Atr.Id@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_@Atr.Id','@Atr.Nombre','@i_atr','@Atr.Id');">@str.ToString()</a>
+                                                    }
+                                                    i_atr++;
+                                                }
+                                            </div>
+                                        </li>
+                                    }
+                                </ol>
+                            </dd>
+                        </dl>
+                    </div>
+                                    auxFiltro.Clear();
+                                    dicStr.Clear();
+                                    auxRubro = oArt.Rubro;
+                    }
+                }
+                @if (auxFiltro.Count > 0)
+                {
+                    <div class='block-filters'>
+                        <dl>
+                            <dt onclick="MostrarDt(this);">@auxRubro_ultimo</dt>
+                            <dd>
+                                <ol>
+                                    @foreach (Atributo Atr1 in auxFiltro)
+                                    {
+                                        i_atr = 0;
+                                        <li>
+                                            <a href="javaScript:void(0);" onclick="OpenValues('val_@Atr1.Id');">@Atr1.Nombre</a>
+                                            <div id="val_@Atr1.Id"  style="display:none;padding: 20px 0 0 10px;">
+                                                @foreach (string str in dicStr[Atr1.Nombre])
+                                                {
+                                                    if (str.ToString() != "")
+                                                    {
+                                                        <a style="width:180px" id="fil_@Atr1.Id@i_atr" name="fil_@Atr1.Id@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_@Atr1.Id','@Atr1.Nombre','@i_atr','@Atr1.Id');">@str.ToString()</a>
+                                                    }
+                                                    i_atr++;
+                                                }
+                                            </div>
+                                        </li>
+                                    }
+                                </ol>
+                            </dd>
+                        </dl>
+                    </div>
+                }
+
+
+            </div>
+            <div id="div_product" name="div_product" style="float: left; background-color: #ffffff; width: 700px; padding-left: 10px;">
+                <div class="title_label">
+                    <span>Ensayos</span><span style="font-size:11px">&nbsp;(@Model.Ensayos.Count Encontrados)</span>
+                </div>
+                <div style="float: right">
+                    <input type="button" value="    TESTIMONIOS" class="buttonGreen testimonios" onclick="SendTestimonios()" style="height: 32px">
+                </div>
+                <div id="div_detail" name="div_detail" class="marr le datatable">
+                    @Html.Hidden("newSort", oldSort)
+                    <table id="detailstable" name="detailstable" style="border: 0px;float:left;">
+                        <thead>
+                            <tr class="ui-widget-header">
+                                <th></th>
+                                <th></th>
+                                <th class="@ord_campana ri" style="width: 100px;" nowrap>Campaña
+                        <div style="float: right; margin-right: 5px;">
+                            <a href="#" onclick="sendSubmit('campanaAsc');" title="Ordenar Ascendente" class="order_icon">&#x25B2;</a>
+                            <a href="#" onclick="sendSubmit('campanaDesc');" title="Ordenar Descendente" class="order_icon">&#x25BC;</a>
+                        </div>
+                                </th>
+                                <th class="@ord_fuente ri" nowrap style="width: 80px;">Fuente
+                        <div style="float: right; margin-right: 5px;">
+                            <a href="#" onclick="sendSubmit('fuenteAsc');" title="Ordenar Ascendente" class="order_icon">&#x25B2;</a>
+                            <a href="#" onclick="sendSubmit('fuenteDesc');" title="Ordenar Descendente" class="order_icon">&#x25BC;</a>
+                        </div>
+                                </th>
+                                <th class="@ord_producto ri" style="width: 100px;" nowrap>Producto
+                        <div style="float: right; margin-right: 5px;">
+                            <a href="#" onclick="sendSubmit('productoAsc');" title="Ordenar Ascendente" class="order_icon">&#x25B2;</a>
+                            <a href="#" onclick="sendSubmit('productoDesc');" title="Ordenar Descendente" class="order_icon">&#x25BC;</a>
+                        </div>
+                                </th>
+                                <th class="@ord_provincia ri" style="width: 80px;" nowrap>Provincia
+                        <div style="float: right; margin-right: 5px;">
+                            <a href="#" onclick="sendSubmit('provinciaAsc');" title="Ordenar Ascendente" class="order_icon">&#x25B2;</a>
+                            <a href="#" onclick="sendSubmit('provinciaDesc');" title="Ordenar Descendente" class="order_icon">&#x25BC;</a>
+                        </div>
+                                </th>
+                                <th class="@ord_localidad ri" nowrap>Localidad
+                        <div style="float: right; margin-right: 5px;">
+                            <a href="#" onclick="sendSubmit('localidadAsc');" title="Ordenar Ascendente" class="order_icon">&#x25B2;</a>
+                            <a href="#" onclick="sendSubmit('localidadDesc');" title="Ordenar Descendente" class="order_icon">&#x25BC;</a>
+                        </div>
+                                </th>
+                                <th class="@ord_rinde ri" style="width: 80px;" nowrap>Rinde
+                        <div style="float: right; margin-right: 5px;">
+                            <a href="#" onclick="sendSubmit('rindeAsc');" title="Ordenar Ascendente" class="order_icon">&#x25B2;</a>
+                            <a href="#" onclick="sendSubmit('rindeDesc');" title="Ordenar Descendente" class="order_icon">&#x25BC;</a>
+                        </div>
+                                </th>
+                                <th style="width: 65px;"><span title="Posición dentro del Ensayo">Rank.</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="ensayoList" name="ensayoList">
+                        </tbody>
+                    </table>
+                </div>
+
+                <input type="hidden" id=lastRowId name=lastRowId value="0" />
+                <!-- div id="productList"></!-->    
+                <div id="loading" style="display:none;float:left;margin-top: 5px;margin-left: 45%;"><img src="~/Images/fancybox_loading.gif"></div> 
+
+                <div style="clear: both;"></div>
+            </div>
+        </div>
+    }
+
+    <div id="chartDiv" style="display: none; width: 1000px;">
+        <img id="loadinggif2" src="../../images/fancybox_loading.gif" style="margin: auto" />
+        <div id="chartcontainer" style="min-width: 910px; height: 400px; margin: 0 auto"></div>
+    </div>
+    <script src="~/Scripts/resultadosEnsayos.js">
+    </script>
+    <script src="~/Scripts/highcharts/highcharts.js"></script>
+    <script src="~/Scripts/highcharts/exporting.js"></script>
+
+    <script>
+        function SendTestimonios() {
+            window.location.href = "@Html.Raw(Url.Action("Testimonios", "Productos", new { CategoriaIdProductos = Model.CategoriaIdEnsayos, BuscarProductos = Model.BuscarEnsayos, EsEnsayo = 1 }))";
+     
+        }
+
+        function SendFiltro1(fuente,campana,localidad,campanaId)
+        {
+            window.location.href = "@Html.Raw(Url.Action("ResultadosEnsayos", "Ensayos", new { CategoriaIdEnsayos = Model.CategoriaIdEnsayos, BuscarEnsayos = Model.BuscarEnsayos }))" + "&FiltroFuente=" + fuente + "&FiltroCampana="+ campana+"&FiltroLocalidad=" +localidad +"&FiltroCampanaId="+campanaId;
+        }
+
+        function SendFiltro2(categoriaId, fuente,lugarId,campanaId)
+        {
+            //Abro el Fancybox
+            $.fancybox.open([
+            {
+                href: '#chartDiv',
+                minHeight: 200,
+                width: 1000,
+                minWidth: 1000,
+                scrolling: 'no'
+            }]);
+
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetChartData", "Ensayos")',
+                data: { categoriaId: categoriaId, campanaId: campanaId, lugarId: lugarId, fuente: fuente },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (jsonData) {
+                    if (jsonData.length > 0) {
+                        $("#chart_div").show();
+                     //   $("#loadinggif2").hide();
+
+                        var chartcategories = [];
+                        var chartpoints = [];
+                        $(jsonData).each(function (i, item) {
+                            chartcategories.push(item.Producto);
+                            var color = '#2f7ed8';
+                            if (item.Producto == 'PROMEDIO')
+                            {
+                                color = '#0d233a';
+                            }
+                            else if (item.Producto == 'ULTIMO')
+                            {
+                                color = '#910000';
+                            }
+                            chartpoints.push({y: item.Rinde, color: color});
+                        });
+
+                        /* Chart */
+                        $('#chartcontainer').highcharts({
+                            chart: {
+                                type: 'column'
+                            },
+                            credits: {
+                                enabled: false
+                            },
+                            title: {
+                                text: 'Gráfico del Ensayo'
+                            },
+                            xAxis: {
+                                categories: chartcategories
+                            },
+                            yAxis: {
+                                min: 0,
+                                title: {
+                                    text: 'Rinde (kg/ha)'
+                                }
+                            },
+                            legend: {
+                                enabled: false
+                            },
+                            tooltip: {
+                                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                                    '<td style="padding:0"><b>{point.y:.1f} kg/ha</b></td></tr>',
+                                footerFormat: '</table>',
+                                shared: true,
+                                useHTML: true
+                            },
+                            plotOptions: {
+                                column: {
+                                    pointPadding: 0.2,
+                                    borderWidth: 0
+                                }
+                            },
+                            series: [{
+                                name: 'Rinde',
+                                data: chartpoints}]
+                        });
+                    }
+                    else {
+                        $("#loadinggif2").hide();
+                    }
+                }
+            });
+        }
+
+    //get default ensayos
+    $(document).ready(function () {
+            
+        $("#lastRowId").val(0);
+            
+        GetEnsayoFromNextPage(false);
+
+    });
+
+        //get next ensayos automatic
+        $(window).scroll(function () {
+            if ($(window).scrollTop() == $(document).height() - $(window).height()) {
+                GetEnsayoFromNextPage(true);
+            }
+  
+        });
+
+    </script>
+}
+

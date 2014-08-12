@@ -1,0 +1,66 @@
+﻿@using AgroEnsayos.Entities;
+@{
+    ViewBag.Title = "Ensayos";
+    List<Ensayo> items = ViewBag.Ensayos as List<Ensayo>; 
+}
+
+@section featured {
+    <section>
+        <div class="container header header3">
+            <div class="logo2">
+                <a href="/Home/" title="Volver a la Página Principal">
+                    <img src="/images/logo.png" class="logo"></a>
+            </div>
+            <div class="searchrow2">
+                <input data-val="true" data-val-required="Debe escribir algo" id="BuscarProductos" name="BuscarProductos" class="searchtext big" placeholder="Buscar" type="text" value=""><input type="submit" class="searchicon" style="margin-right: 50px" value=""><input type="button" class="userbutton" />
+            </div>
+        </div>
+        <div class="container header header3" style="height: 40px;">
+            <div class="breadcrumb">
+            </div>
+        </div>
+        <div class="container header3" style="background-color: #f7f7f7">
+            <div style="float: left; width: 240px">
+            </div>
+            <div style="float: left; background-color: #ffffff; width: 700px; padding-left: 10px; padding-bottom: 10px">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Campaña</th>
+                            <th>Fuente</th>
+                            <th>Producto</th>
+                            <th>Provincia</th>
+                            <th>Departamento</th>
+                            <th>Localidad</th>
+                            <th>Rinde</th>
+                        </tr>
+                    </thead>
+                    @{
+                        if (items != null)
+                        {
+                            foreach (Ensayo item in items)
+                            {
+                        <tr>
+                            <td>@item.Campana</td>
+                            <td>@item.Fuente</td>
+                            <td>@item.Producto</td>
+                            <td>@item.Provincia</td>
+                            <td>@item.Departamento</td>
+                            <td>@item.Localidad</td>
+                            <td>@item.Rinde</td>
+                        </tr>
+                            }
+                        }
+                    }
+                </table>
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+
+
+    </section>
+}
+
+
+
+

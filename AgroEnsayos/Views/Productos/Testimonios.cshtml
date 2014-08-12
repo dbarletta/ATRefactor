@@ -1,0 +1,76 @@
+﻿@model AgroEnsayos.Models.SearchModel
+@using AgroEnsayos.Entities;
+@{
+    int ResEnsayo = ViewBag.EsEnsayo;
+          
+}
+    @using (Html.BeginForm("Resultados", "Productos", FormMethod.Post, new { id = "Resultform" }))
+    {
+        <div class="container header header3">
+            <div class="logo2">
+                <a href="/Home/" title="Volver a la Página Principal">
+                    <img src="/images/logo.png" class="logo"></a>
+            </div>
+            <div class="searchrow2">
+                <input type="hidden" value="@Model.CategoriaIdProductos" id="CategoriaIdProductos" name="CategoriaIdProductos">
+                <input data-val="true" data-val-required="Debe escribir algo" id="BuscarProductos" name="BuscarProductos" class="searchtext big" placeholder="Buscar" type="text" value="@Model.BuscarProductos"><input type="submit" class="searchicon" style="margin-right: 50px" value=""><input type="button" class="userbutton" />
+            </div>
+        </div>
+        <div class="container header header3" style="height: 40px;">
+            <div class="breadcrumb" style="float:left">
+                @Html.ActionLink("Cultivos", "Index", "Home")
+                @if (Model.Categoria != null)
+                {
+                    <span>&nbsp;>&nbsp;</span>
+                    @Html.ActionLink(Model.Categoria, "Busqueda/" + Model.CategoriaIdProductos, "Home")
+                }
+                    <span>&nbsp;>&nbsp;</span>
+                @if(ResEnsayo==0)
+                {
+                    @Html.ActionLink("Productos", "Resultados", "Productos", new { CategoriaIdProductos= Model.CategoriaIdProductos ,BuscarProductos = Model.BuscarProductos }, null)
+                }
+                else
+                {
+                    @Html.ActionLink("Ensayos", "ResultadosEnsayos", "Ensayos", new { CategoriaIdEnsayos= Model.CategoriaIdProductos ,BuscarEnsayos = Model.BuscarProductos }, null)
+                }
+                    <span>&nbsp;>&nbsp;</span>
+                    @Html.ActionLink("Testimonios", "Testimonios", "Productos", new { CategoriaIdProductos= Model.CategoriaIdProductos ,BuscarProductos = Model.BuscarProductos }, null)
+            </div>
+        </div>
+    }
+        <div class="container header3" style="background-color: #f7f7f7">
+            <div style="float: left; background-color: #ffffff; padding-left: 10px; padding-bottom: 10px">
+              <div class="title_label" style="float:left;margin-left:20px">Testimonios</div>
+              
+            <div id="div_detail" name="div_detail" style="float:left" class="marr le datatable">
+
+             <div class="video_div">
+                <iframe width="420" height="315" src="//www.youtube.com/embed/WZG--Gokjjw?&amp;rel=0?&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+                <div class="title_video">Malezas problema: Como cambio el manejo en 20 años</div>
+             </div>
+             <div class="video_div" >
+                <iframe width="420" height="315" src="//www.youtube.com/embed/D89e2qNDazg?&amp;rel=0?&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+                 <div class="title_video">Malezas problema: Como cambio el manejo en 20 años</div>
+             </div>
+             <div class="video_div">
+                <iframe width="420" height="315" src="//www.youtube.com/embed/0BOF0eyFbqM?&amp;rel=0?&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+                 <div class="title_video">Malezas problema: Como cambio el manejo en 20 años</div>
+             </div>
+             <div class="video_div">
+                <iframe width="420" height="315" src="//www.youtube.com/embed/TcjepJwhDDY?&amp;rel=0?&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+                 <div class="title_video">Malezas problema: Como cambio el manejo en 20 años</div>
+             </div>
+             <div class="video_div">
+                <iframe width="420" height="315" src="//www.youtube.com/embed/_6X0CFvBYf0?&amp;rel=0?&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+                 <div class="title_video">Malezas problema: Como cambio el manejo en 20 años</div>
+             </div>
+             <div class="video_div">
+              <iframe width="420" height="315" src="//www.youtube.com/embed/wWsaidmnSHo?&amp;rel=0?&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+                 <div class="title_video">Malezas problema: Como cambio el manejo en 20 años</div>
+             </div>
+                  </div >
+            <div style="clear: both;"></div>
+        </div>
+        </div>
+   
+
