@@ -132,4 +132,7 @@
   <ItemGroup>
     <RefactorLog Include="AgroEnsayos.Database.refactorlog" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="AgroEnsayos.Database.publish.xml" />
+  </ItemGroup>
 </Project>

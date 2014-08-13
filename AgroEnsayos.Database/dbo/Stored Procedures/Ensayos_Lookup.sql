@@ -40,7 +40,7 @@ BEGIN
 	Inner join [Campaigns] camp on en.[CampaignId] = camp.Id
 	Inner Join @ranking r on en.Id = r.Id
 	Inner Join @total t on en.[PlaceId] = t.LugarId and en.[CampaignId] = t.CampanaId and en.[Source] = t.Fuente
-	left join (select distinct pa.[ProductId] productoId 
+	left join (select distinct pa.[ProductId]  
 				from [ProductAttribute] pa 
 					inner join [AttributeMappings] ae on (pa.[AttributeId] = ae.[AttributeId] and pa.[OriginalValue] = ae.[OriginalValue]  ) 
 					inner join @atributoTbl atbl on (atbl.AtributoId = ae.[AttributeId] and atbl.Equivalencia = ae.[MappedValue])

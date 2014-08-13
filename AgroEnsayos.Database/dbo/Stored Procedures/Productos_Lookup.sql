@@ -17,7 +17,7 @@ BEGIN
 	From [Products] p
 	Inner Join [Companies] e on p.[CompanyId] = e.Id
 	Inner Join [Categories] c on p.[CategoryId] = c.Id
-	left join (select distinct pa.[ProductId] productoId 
+	left join (select distinct pa.[ProductId] 
 				from [ProductAttribute] pa 
 					inner join [AttributeMappings] ae on (pa.[AttributeId] = ae.[AttributeId] and pa.[OriginalValue] = ae.[OriginalValue]  ) 
 					inner join @atributoTbl atbl on (atbl.AtributoId = ae.[AttributeId] and atbl.Equivalencia = ae.[MappedValue])
