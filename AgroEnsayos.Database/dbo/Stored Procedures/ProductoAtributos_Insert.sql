@@ -4,6 +4,6 @@
 @Valor varchar(100)
 AS
 BEGIN
-INSERT INTO ProductoAtributos VALUES(@ProductoId, @AtributoId, @Valor)
+INSERT INTO [ProductAttribute] VALUES(@ProductoId, @AtributoId, @Valor)
 
 END

@@ -7,7 +7,7 @@
 	@Deshabilitado bit = 0
 AS
 BEGIN
-	INSERT INTO Atributos VALUES(@Rubro, @Nombre, @TipoDato, @Tags, @UsarComoFiltro, @Deshabilitado)
+	INSERT INTO [Attributes] VALUES(@Rubro, @Nombre, @TipoDato, @Tags, @UsarComoFiltro, @Deshabilitado)
 	
 	SELECT SCOPE_IDENTITY()
 END

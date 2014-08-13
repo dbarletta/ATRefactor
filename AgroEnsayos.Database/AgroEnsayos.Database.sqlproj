@@ -69,23 +69,23 @@
     <Folder Include="dbo\User Defined Types\" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="dbo\Tables\Categorias.sql" />
-    <Build Include="dbo\Tables\Empresas.sql" />
-    <Build Include="dbo\Tables\temp_productos.sql" />
-    <Build Include="dbo\Tables\AtributoCategorias.sql" />
-    <Build Include="dbo\Tables\Lugares.sql" />
-    <Build Include="dbo\Tables\Campanas.sql" />
-    <Build Include="dbo\Tables\ProductoAtributos.sql" />
+    <Build Include="dbo\Tables\Categories.sql" />
+    <Build Include="dbo\Tables\Companies.sql" />
+    <Build Include="dbo\Tables\Temp_Products.sql" />
+    <Build Include="dbo\Tables\AttributeCategory.sql" />
+    <Build Include="dbo\Tables\Places.sql" />
+    <Build Include="dbo\Tables\Campaigns.sql" />
+    <Build Include="dbo\Tables\ProductAttribute.sql" />
     <Build Include="dbo\Tables\Productos.sql" />
-    <Build Include="dbo\Tables\temp_lugares.sql" />
-    <Build Include="dbo\Tables\Ensayos.sql" />
-    <Build Include="dbo\Tables\ProductoLugares.sql" />
-    <Build Include="dbo\Tables\provincias.sql" />
-    <Build Include="dbo\Tables\departamentos.sql" />
-    <Build Include="dbo\Tables\localidades.sql" />
-    <Build Include="dbo\Tables\Atributos.sql" />
+    <Build Include="dbo\Tables\Temp_Places.sql" />
+    <Build Include="dbo\Tables\Tests.sql" />
+    <Build Include="dbo\Tables\ProductPlace.sql" />
+    <Build Include="dbo\Tables\Province.sql" />
+    <Build Include="dbo\Tables\Departments.sql" />
+    <Build Include="dbo\Tables\Localities.sql" />
+    <Build Include="dbo\Tables\Attributes.sql" />
     <Build Include="dbo\Tables\Users.sql" />
-    <Build Include="dbo\Tables\AtributoEquivalencias.sql" />
+    <Build Include="dbo\Tables\AttributeMappings.sql" />
     <Build Include="dbo\Stored Procedures\BackupDb.sql" />
     <Build Include="dbo\Stored Procedures\Regiones_Get.sql" />
     <Build Include="dbo\Stored Procedures\Filtros_Get.sql" />
@@ -105,7 +105,7 @@
     <Build Include="dbo\Stored Procedures\Productos_Get.sql" />
     <Build Include="dbo\Stored Procedures\Atributos_GetEquivalencias.sql" />
     <Build Include="dbo\Stored Procedures\Atributos_SaveEquivalencia.sql" />
-    <Build Include="dbo\User Defined Types\AtributoEquivalenciasType.sql" />
+    <Build Include="dbo\User Defined Types\AttributeMappingType.sql" />
     <Build Include="dbo\Stored Procedures\Productos_TraerHabilitados.sql" />
     <Build Include="dbo\Stored Procedures\Productos_Insert.sql" />
     <Build Include="dbo\Stored Procedures\Productos_Edit.sql" />
@@ -121,7 +121,7 @@
     <Build Include="dbo\Stored Procedures\Atributos_GetById.sql" />
     <Build Include="dbo\Stored Procedures\Atributos_Update.sql" />
     <Build Include="dbo\Stored Procedures\Atributos_Insert.sql" />
-    <Build Include="dbo\Tables\temp_ensayos.sql" />
+    <Build Include="dbo\Tables\Temp_Tests.sql" />
     <Build Include="dbo\Stored Procedures\temp_ensayos_UpsertExcel.sql" />
     <Build Include="dbo\Stored Procedures\temp_ensayos_Validations.sql" />
     <Build Include="dbo\Stored Procedures\temp_ensayos_truncate.sql" />

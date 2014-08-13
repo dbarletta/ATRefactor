@@ -3,8 +3,8 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	select Id, Region from Lugares
-  where region is not null and Departamento is null and Cabecera is null
+	select Id, Region from [Places]
+  where region is not null and [Department] is null and [Header] is null
 END
 
 

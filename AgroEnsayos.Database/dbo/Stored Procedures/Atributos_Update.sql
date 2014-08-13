@@ -9,12 +9,12 @@ CREATE PROCEDURE [dbo].[Atributos_Update]
 	@Deshabilitado bit = 0
 AS
 BEGIN
-	UPDATE Atributos 
-	SET Rubro = @Rubro
-	  , Nombre = @Nombre
-	  , TipoDato = @TipoDato
+	UPDATE [Attributes] 
+	SET [Family] = @Rubro
+	  , [Name] = @Nombre
+	  , [DataType] = @TipoDato
 	  , Tags = @Tags
-	  , UsarComoFiltro = @UsarComoFiltro
-	  , Deshabilitado = 0
+	  , [IsFilter] = @UsarComoFiltro
+	  , [IsDisabled] = 0
 	WHERE Id = @Id
 END

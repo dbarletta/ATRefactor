@@ -6,11 +6,11 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	SELECT distinct l.Provincia From Lugares l 
+	SELECT distinct l.[Province] From [Places] l 
 	where 
-		l.Provincia is not null 
-		AND (@categoriaId = 0 OR (@categoriaId != 0 AND Id in (select e.LugarId from Productos p , Ensayos e where e.ProductoId=p.Id and CategoriaId=@categoriaId)))
-	Order by l.Provincia
+		l.[Province] is not null 
+		AND (@categoriaId = 0 OR (@categoriaId != 0 AND Id in (select e.[PlaceId] from [Products] p , [Tests] e where e.[ProductId]=p.Id and [CategoryId]=@categoriaId)))
+	Order by l.[Province]
 	
 END
 

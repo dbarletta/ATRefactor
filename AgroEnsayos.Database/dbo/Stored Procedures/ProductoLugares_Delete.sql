@@ -3,7 +3,7 @@
 AS
 BEGIN
 	SET NOCOUNT ON;
-delete from ProductoLugares where ProductoId = @productid
+delete from [ProductPlace] where [ProductId] = @productid
 
 END
 

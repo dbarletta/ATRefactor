@@ -7,10 +7,10 @@ BEGIN
 	SET NOCOUNT ON;
 
 	SELECT distinct region 
-	From Lugares 
+	From [Places] 
 	where 
 		Region is not null 
-		AND (@categoriaId = 0 OR (@categoriaId != 0 AND Id in (select l.LugarId from Productos p , ProductoLugares l where l.ProductoId=p.Id and CategoriaId=@categoriaId)))
+		AND (@categoriaId = 0 OR (@categoriaId != 0 AND Id in (select l.[PlaceId] from [Products] p , [ProductPlace] l where l.[ProductId]=p.Id and [CategoryId]=@categoriaId)))
 	Order by Region
 	
 END

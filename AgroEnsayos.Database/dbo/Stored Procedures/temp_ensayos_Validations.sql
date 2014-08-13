@@ -7,37 +7,37 @@ BEGIN
 		1 TipoError
 		, 2 Severity
 		, 'Alguno de los datos obligatorios está faltando (Fuente, Provincia, Localidad, Campaña, Producto, Fecha de siembra o Rinde)' Description
-		, Fuente Param1
-		, Campana Param2
-		, Producto Param3
-		, Rinde Param4
-		, Provincia + ' ' + Localidad Param5
+		, [Source] Param1
+		, [Campaign] Param2
+		, [Product] Param3
+		, [Yield] Param4
+		, [Province] + ' ' + [Locality] Param5
 		, Row 
-	from temp_ensayos 
+	from [Temp_Tests] 
 	where 
-		Campana is null or Campana = '' or Campana = ' '  or Campana = 's/d'  
-		or Producto is null or Producto = '' or Producto = ' '  or Producto = 's/d'  
-		or Rinde is null or Rinde = 0  
-		or Fuente is null or Fuente = '' or Fuente = ' ' or Fuente = 's/d'
-		or Provincia is null or Provincia = '' or Provincia = ' ' or Provincia = 's/d'
-		or Localidad is null or Localidad = '' or Localidad = ' ' or Localidad = 's/d'
-		or FechaSiembra is null
+		[Campaign] is null or [Campaign] = '' or [Campaign] = ' '  or [Campaign] = 's/d'  
+		or [Product] is null or [Product] = '' or [Product] = ' '  or [Product] = 's/d'  
+		or [Yield] is null or [Yield] = 0  
+		or [Source] is null or [Source] = '' or [Source] = ' ' or [Source] = 's/d'
+		or [Province] is null or [Province] = '' or [Province] = ' ' or [Province] = 's/d'
+		or [Locality] is null or [Locality] = '' or [Locality] = ' ' or [Locality] = 's/d'
+		or [PlantingDate] is null
 	UNION
 	
 	--Productos
 	select distinct
 		2 TipoError
 		, 2 Severity
-		, 'El Producto ' + e.Producto + ' no se encontró en la Aplicación' Description
-		, e.Producto Param1
+		, 'El Producto ' + e.[Product] + ' no se encontró en la Aplicación' Description
+		, e.[Product] Param1
 		, '' Param2
 		, '' Param3
 		, '' Param4
 		, '' Param5
 		, Row 
-	from temp_ensayos e
-	Left Join Productos p on RTRIM(LTRIM(e.Producto)) = p.Nombre
-	Where p.Id is null and e.Producto is not null and e.Producto != '' and e.Producto != ' ' and e.Producto != 's/d'
+	from [Temp_Tests] e
+	Left Join [Products] p on RTRIM(LTRIM(e.[Product])) = p.[Name]
+	Where p.Id is null and e.[Product] is not null and e.[Product] != '' and e.[Product] != ' ' and e.[Product] != 's/d'
 	
 	UNION
 	
@@ -45,16 +45,16 @@ BEGIN
 	select distinct
 		2 TipoError
 		, 2 Severity
-		, 'La Campaña ' + e.Campana + ' de ' + (Select Nombre From Categorias Where Id = @categoriaId) + ' no se encontró en la Aplicación' Description
-		, e.Campana Param1
+		, 'La Campaña ' + e.[Campaign] + ' de ' + (Select [Name] From [Categories] Where Id = @categoriaId) + ' no se encontró en la Aplicación' Description
+		, e.[Campaign] Param1
 		, '' Param2
 		, '' Param3
 		, '' Param4
 		, '' Param5
 		, Row 
-	from temp_ensayos e
-	Left Join Campanas camp on camp.Nombre = e.Campana and camp.CategoriaId = @categoriaId
-	Where camp.Id is null and e.Campana is not null and e.Campana != '' and e.Campana != ' ' and e.Campana != 's/d'
+	from [Temp_Tests] e
+	Left Join [Campaigns] camp on camp.[Name] = e.[Campaign] and camp.[CategoryId] = @categoriaId
+	Where camp.Id is null and e.[Campaign] is not null and e.[Campaign] != '' and e.[Campaign] != ' ' and e.[Campaign] != 's/d'
 	
 	UNION 
 	
@@ -64,20 +64,20 @@ BEGIN
 	select distinct
 		2 TipoError
 		, 2 Severity
-		, 'El Lugar compuesto por la Provincia de ' + e.Provincia + ' y en la Localidad / Departamento de ' + e.Localidad + ' no se encontró en la Aplicación' Description
-		, e.Provincia Param1
-		, e.Localidad Param2
+		, 'El Lugar compuesto por la Provincia de ' + e.[Province] + ' y en la Localidad / Departamento de ' + e.[Locality] + ' no se encontró en la Aplicación' Description
+		, e.[Province] Param1
+		, e.[Locality] Param2
 		, CASE WHEN l.Id is not null THEN CAST(l.Id AS VARCHAR(10)) ELSE CAST(l2.Id AS VARCHAR(10)) END AS Param3
 		, '' Param4
 		, '' Param5
 		, Row 
-	from temp_ensayos e
-	Left Join Lugares l on e.Provincia = l.Provincia and e.Localidad = l.Localidad and l.localidad is not null
-	Left Join Lugares l2 on l.Id is null and e.Provincia = l2.Provincia and e.Localidad = l2.Departamento and l2.Departamento is not null and l2.Localidad is null
+	from [Temp_Tests] e
+	Left Join [Places] l on e.[Province] = l.[Province] and e.[Locality] = l.[Locality] and l.[Locality] is not null
+	Left Join [Places] l2 on l.Id is null and e.[Province] = l2.[Province] and e.[Locality] = l2.[Department] and l2.[Department] is not null and l2.[Locality] is null
 	Where 
 		(l.Id is null or l2.Id is null) 
-		and e.Provincia is not null and e.Provincia != '' and e.Provincia != ' ' and e.Provincia != 's/d'
-		and e.Localidad is not null and e.Localidad != '' and e.Localidad != ' ' and e.Localidad != 's/d'
+		and e.[Province] is not null and e.[Province] != '' and e.[Province] != ' ' and e.[Province] != 's/d'
+		and e.[Locality] is not null and e.[Locality] != '' and e.[Locality] != ' ' and e.[Locality] != 's/d'
 	) data
 	Where Param3 is null
 	
@@ -88,26 +88,26 @@ BEGIN
 		3 TipoError
 		, 2 Severity
 		, 'Este dato se encuentra repetido' Description
-		, Fuente Param1
-		, Campana Param2
-		, Provincia Param3
-		, Localidad Param4
-		, Producto Param5
+		, [Source] Param1
+		, [Campaign] Param2
+		, [Province] Param3
+		, [Locality] Param4
+		, [Product] Param5
 		, Repetidos  
 	From (
-		select Fuente, Campana, Provincia, Localidad, Producto, COUNT(Fuente) Repetidos From (
-		select Fuente, Campana, Provincia, Localidad, Producto, Rinde From temp_ensayos
+		select [Source], [Campaign], [Province], [Locality], [Product], COUNT([Source]) Repetidos From (
+		select [Source], [Campaign], [Province], [Locality], [Product], [Yield] From [Temp_Tests]
 		where 
-		Campana is null or Campana = '' or Campana = ' '  or Campana = 's/d'  
-		or Producto is null or Producto = '' or Producto = ' '  or Producto = 's/d'  
-		or Rinde is null or Rinde = 0  
-		or Fuente is null or Fuente = '' or Fuente = ' ' or Fuente = 's/d'
-		or Provincia is null or Provincia = '' or Provincia = ' ' or Provincia = 's/d'
-		or Localidad is null or Localidad = '' or Localidad = ' ' or Localidad = 's/d'
+		[Campaign] is null or [Campaign] = '' or [Campaign] = ' '  or [Campaign] = 's/d'  
+		or [Product] is null or [Product] = '' or [Product] = ' '  or [Product] = 's/d'  
+		or [Yield] is null or [Yield] = 0  
+		or [Source] is null or [Source] = '' or [Source] = ' ' or [Source] = 's/d'
+		or [Province] is null or [Province] = '' or [Province] = ' ' or [Province] = 's/d'
+		or [Locality] is null or [Locality] = '' or [Locality] = ' ' or [Locality] = 's/d'
 
-		Group By Fuente, Campana, Provincia, Localidad, Producto, Rinde) data
-		Group By Fuente, Campana, Provincia, Localidad, Producto
-		Having Count(Fuente) > 1
+		Group By [Source], [Campaign], [Province], [Locality], [Product], [Yield]) data
+		Group By [Source], [Campaign], [Province], [Locality], [Product]
+		Having Count([Source]) > 1
 	) data
 		
 	

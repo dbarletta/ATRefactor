@@ -4,6 +4,6 @@ CREATE PROCEDURE [dbo].[Empresas_GetNombres]
 AS
 BEGIN
 	SET NOCOUNT ON;
-		SELECT Nombre From Empresas Where Deshabilitada = 0 
-		Order by Nombre
+		SELECT [Name] From [Companies] Where [IsDisabled] = 0 
+		Order by [Name]
 END

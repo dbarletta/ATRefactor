@@ -6,14 +6,14 @@ BEGIN
 
 	SELECT 
 		  a.Id
-		, isNull(a.Rubro,'Propiedades') Rubro
-		, a.Nombre
-		, a.TipoDato
+		, isNull(a.[Family],'Propiedades') Rubro
+		, a.[Name]
+		, a.[DataType]
 		, a.Tags
-		, pa.Valor   
-	FROM Atributos a
-		INNER JOIN AtributoCategorias ac on ac.AtributoId = a.Id
-		LEFT JOIN ProductoAtributos pa on pa.AtributoId = a.Id and pa.ProductoId = @ProductoId
-	WHERE ac.CategoriaId = (select CategoriaId from Productos where Id = @ProductoId) AND a.Deshabilitado = 0
-	ORDER BY isNull(a.Rubro,'aa') , a.Nombre
+		, pa.[OriginalValue]   
+	FROM [Attributes] a
+		INNER JOIN [AttributeCategory] ac on ac.[AttributeId] = a.Id
+		LEFT JOIN [ProductAttribute] pa on pa.[AttributeId] = a.Id and pa.[ProductId] = @ProductoId
+	WHERE ac.[CategoryId] = (select [CategoryId] from [Products] where Id = @ProductoId) AND a.[IsDisabled] = 0
+	ORDER BY isNull(a.[Family],'aa') , a.[Name]
 END

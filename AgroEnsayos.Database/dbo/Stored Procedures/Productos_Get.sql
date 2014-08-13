@@ -7,13 +7,13 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	SELECT p.Id, p.CategoriaId, c.Nombre Categoria, p.EmpresaId, e.Nombre Empresa, p.Nombre, p.DescripcionPG, p.Material, p.EsHibrido, p.Ciclo, p.EsConvencional, p.DiasFloracion, p.DiasMadurez, p.AlturaPlanta, p.EsNuevo, p.Alta, p.FechaCarga 
-	From Productos p
-	Inner Join Empresas e on p.EmpresaId = e.Id
-	Inner Join Categorias c on p.CategoriaId = c.Id
+	SELECT p.Id, p.[CategoryId], c.[Name] Categoria, p.[CompanyId], e.[Name] Empresa, p.[Name], p.[Description], p.Material, p.[IsHybrid], p.[Cycle], p.[IsConventional], p.[DaysToFlowering], p.[DaysToMaturity], p.[PlantHeight], p.[IsNew], p.[Height], p.[EntryDate] 
+	From [Products] p
+	Inner Join [Companies] e on p.[CompanyId] = e.Id
+	Inner Join [Categories] c on p.[CategoryId] = c.Id
 	Where 
-		(@categoriaId IS NULL OR @categoriaId = 0 OR (@categoriaId IS NOT NULL AND p.CategoriaId = @categoriaId))
-		AND (@todos = 1 OR (@todos = 0 AND Deshabilitado = 0))
+		(@categoriaId IS NULL OR @categoriaId = 0 OR (@categoriaId IS NOT NULL AND p.[CategoryId] = @categoriaId))
+		AND (@todos = 1 OR (@todos = 0 AND p.[IsDisabled] = 0))
 		AND (@productoId IS NULL OR @productoId = 0 OR (@productoId IS NOT NULL AND p.Id = @productoId))
 	
 END

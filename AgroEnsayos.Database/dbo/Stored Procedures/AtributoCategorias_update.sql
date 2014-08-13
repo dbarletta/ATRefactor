@@ -3,5 +3,5 @@
 	@Id int
 AS
 BEGIN
-	 	Update AtributoCategorias set CategoriaId = @CategoriaId where AtributoId = @Id
+	 	Update [AttributeCategory] set [CategoryId] = @CategoriaId where [AttributeId] = @Id
 END

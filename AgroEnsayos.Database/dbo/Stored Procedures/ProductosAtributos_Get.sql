@@ -5,11 +5,11 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	SELECT p.Id ProductoId, pa.Valor , a.Id , a.Nombre , isNull(a.Rubro,'Propiedades') Rubro , a.Tags , a.TipoDato 
-	From Productos p
-	Inner Join ProductoAtributos pa on p.Id = pa.ProductoId
-	Inner Join Atributos a on a.Id = pa.AtributoId
+	SELECT p.Id ProductoId, pa.[OriginalValue] , a.Id , a.[Name] , isNull(a.[Family],'Propiedades') Rubro , a.Tags , a.[DataType] 
+	From [Products] p
+	Inner Join [ProductAttribute] pa on p.Id = pa.[ProductId]
+	Inner Join [Attributes] a on a.Id = pa.[AttributeId]
 	Where 
 		(@productoId IS NULL OR @productoId = 0 OR (@productoId IS NOT NULL AND p.Id = @productoId))
-	order by isNull(a.Rubro,'aa') , a.Nombre
+	order by isNull(a.[Family],'aa') , a.[Name]
 END

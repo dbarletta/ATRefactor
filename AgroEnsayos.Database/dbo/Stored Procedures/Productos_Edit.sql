@@ -17,20 +17,20 @@
 AS
 BEGIN
 
-UPDATE Productos SET
-CategoriaId = @CategoriaId,
-EmpresaId = @EmpresaId,           
-Nombre = @Nombre,
-DescripcionPG = @DescripcionPG,
+UPDATE [Products] SET
+[CategoryId] = @CategoriaId,
+[CompanyId] = @EmpresaId,           
+[Name] = @Nombre,
+[Description] = @DescripcionPG,
 Material = @Material,
-EsHibrido = @EsHibrido,
-Ciclo = @Ciclo,
-EsConvencional = @EsConvencional,
-DiasFloracion = @DiasFloracion, 
-DiasMadurez = @DiasMadurez,
-AlturaPlanta = @AlturaPlanta,
-EsNuevo = @EsNuevo,
-Alta = @Alta,
-Deshabilitado = @Deshabilitado 
+[IsHybrid] = @EsHibrido,
+[Cycle] = @Ciclo,
+[IsConventional] = @EsConvencional,
+[DaysToFlowering] = @DiasFloracion, 
+[DaysToMaturity] = @DiasMadurez,
+[PlantHeight] = @AlturaPlanta,
+[IsNew] = @EsNuevo,
+[Height] = @Alta,
+[IsDisabled] = @Deshabilitado 
  where Id = @Id
 END

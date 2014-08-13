@@ -3,5 +3,5 @@
 	@Id int
 AS
 BEGIN
-	 	INSERT INTO AtributoCategorias VALUES(@CategoriaId, @Id)
+	 	INSERT INTO [AttributeCategory] VALUES(@CategoriaId, @Id)
 END

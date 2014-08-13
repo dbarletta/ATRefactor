@@ -4,9 +4,9 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	select p.Id ProductoId, l.Id LugarId, l.Region, p.Nombre ProductoNombre  from ProductoLugares
-  inner join Productos p on p.Id = ProductoId
-  inner join Lugares l on l.Id = LugarId
-  where p.Id = @productoId and Region is not null and Departamento is null and Cabecera is null
+	select p.Id ProductoId, l.Id LugarId, l.Region, p.[Name] ProductoNombre  from [ProductPlace]
+  inner join [Products] p on p.Id = [ProductId]
+  inner join [Places] l on l.Id = [PlaceId]
+  where p.Id = @productoId and Region is not null and [Department] is null and [Header] is null
 END
 

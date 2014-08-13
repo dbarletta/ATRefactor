@@ -13,6 +13,6 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-	SELECT c.Id, c.PadreId, c.Nombre, cp.Nombre Padre From Categorias c
-	Left Join Categorias cp on c.PadreId = cp.Id
+	SELECT c.Id, c.[ParentId], c.[Name], cp.[Name] Padre From [Categories] c
+	Left Join [Categories] cp on c.[ParentId] = cp.Id
 END

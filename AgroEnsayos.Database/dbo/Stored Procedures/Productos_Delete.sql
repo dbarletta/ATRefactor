@@ -3,5 +3,5 @@
 AS
 BEGIN
 
-update Productos set Deshabilitado = 1 where Id = @Id
+update [Products] set [IsDisabled] = 1 where Id = @Id
 END

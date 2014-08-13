@@ -5,6 +5,6 @@ BEGIN
 	SET NOCOUNT ON;
 
 	SELECT *, 0 as valor
-	From Atributos a
-	Where a.Id = @Id AND a.Deshabilitado = 0
+	From [Attributes] a
+	Where a.Id = @Id AND a.[IsDisabled] = 0
 END

@@ -17,22 +17,22 @@
 @ID int output
 AS
 BEGIN
-INSERT INTO [dbo].[Productos]
-           ([CategoriaId]
-           ,[EmpresaId]
-           ,[Nombre]
-           ,[DescripcionPG]
+INSERT INTO [dbo].[Products]
+           ([CategoryId]
+           ,[CompanyId]
+           ,[Name]
+           ,[Description]
            ,[Material]
-           ,[EsHibrido]
-           ,[Ciclo]
-           ,[EsConvencional]
-           ,[DiasFloracion]
-           ,[DiasMadurez]
-           ,[AlturaPlanta]
-           ,[EsNuevo]
-           ,[Alta]
-           ,[FechaCarga]
-           ,[Deshabilitado])
+           ,[IsHybrid]
+           ,[Cycle]
+           ,[IsConventional]
+           ,[DaysToFlowering]
+           ,[DaysToMaturity]
+           ,[PlantHeight]
+           ,[IsNew]
+           ,[Height]
+           ,[EntryDate]
+           ,[IsDisabled])
      VALUES(
 @CategoriaId,
 @EmpresaId,

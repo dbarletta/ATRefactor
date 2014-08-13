@@ -5,8 +5,8 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	SELECT ae.AtributoId, a.Nombre Atributo, ae.Valor, ae.Equivalencia, ae.Escala From AtributoEquivalencias ae
-	Inner Join Atributos a on ae.AtributoId = a.Id
-	Where ae.AtributoId = @atributoId and a.Deshabilitado = 0
-	Order by ae.Escala DESC, ae.Valor
+	SELECT ae.[AttributeId], a.[Name] Atributo, ae.[OriginalValue], ae.[MappedValue], ae.[Scale] From [AttributeMappings] ae
+	Inner Join [Attributes] a on ae.[AttributeId] = a.Id
+	Where ae.[AttributeId] = @atributoId and a.[IsDisabled] = 0
+	Order by ae.[Scale] DESC, ae.[OriginalValue]
 END

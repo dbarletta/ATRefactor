@@ -2,6 +2,6 @@
 @ProductId int
 AS
 BEGIN
-DELETE FROM ProductoAtributos where ProductoId = @ProductId
+DELETE FROM [ProductAttribute] where [ProductId] = @ProductId
 
 END

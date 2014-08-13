@@ -8,12 +8,12 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	SELECT distinct a.Id , isnull(a.Rubro,'Caracteristicas') Rubro, a.TipoDato , a.Tags , a.Nombre , ae.Equivalencia valor , ae.Escala
-	FROM AtributoCategorias ac , Atributos a left join AtributoEquivalencias ae on (a.Id = ae.AtributoId)
-	  where CategoriaId = @categoriaId
-	  and ac.AtributoId = a.Id
-	  AND (@filtro = 0 OR (@filtro != 0 AND a.UsarComoFiltro=@filtro))
-	order by isnull(a.Rubro,'Caracteristicas') , a.Nombre , ae.Escala desc
+	SELECT distinct a.Id , isnull(a.[Family],'Caracteristicas') Rubro, a.[DataType] , a.Tags , a.[Name] , ae.[MappedValue] valor , ae.[Scale]
+	FROM [AttributeCategory] ac , [Attributes] a left join [AttributeMappings] ae on (a.Id = ae.[AttributeId])
+	  where [CategoryId] = @categoriaId
+	  and ac.[AttributeId] = a.Id
+	  AND (@filtro = 0 OR (@filtro != 0 AND a.[IsFilter]=@filtro))
+	order by isnull(a.[Family],'Caracteristicas') , a.[Name] , ae.[Scale] desc
 END
 
 

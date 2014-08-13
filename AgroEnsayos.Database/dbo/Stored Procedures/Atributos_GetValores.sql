@@ -5,8 +5,8 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	Select distinct pa.Valor From ProductoAtributos pa
-	Left Join AtributoEquivalencias ae on pa.AtributoId = ae.AtributoId and pa.Valor = ae.Valor
-	Where pa.AtributoId = @atributoId and ae.AtributoId is null
+	Select distinct pa.[OriginalValue] From [ProductAttribute] pa
+	Left Join [AttributeMappings] ae on pa.[AttributeId] = ae.[AttributeId] and pa.[OriginalValue] = ae.[OriginalValue]
+	Where pa.[AttributeId] = @atributoId and ae.[AttributeId] is null
 END
 
