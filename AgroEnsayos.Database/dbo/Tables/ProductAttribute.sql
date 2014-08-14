@@ -1,9 +1,10 @@
 ﻿CREATE TABLE [dbo].[ProductAttribute] (
-    [ProductId] INT           NOT NULL,
-    [AttributeId] INT           NOT NULL,
-    [OriginalValue]      VARCHAR (100) NOT NULL,
-    CONSTRAINT [PK_ProductoAtributos] PRIMARY KEY CLUSTERED ([ProductId] ASC, [AttributeId] ASC),
-    CONSTRAINT [FK_ProductoAtributos_Atributos] FOREIGN KEY ([AttributeId]) REFERENCES [dbo].[Attributes] ([Id]),
+    [ProductId]          INT NOT NULL,
+    [AttributeMappingId] INT NOT NULL,
+    CONSTRAINT [PK_ProductoAtributos] PRIMARY KEY CLUSTERED ([ProductId] ASC, [AttributeMappingId] ASC),
+    CONSTRAINT [FK_ProductAttribute_AttributeMappings] FOREIGN KEY ([AttributeMappingId]) REFERENCES [dbo].[AttributeMappings] ([AttributeMappingId]),
     CONSTRAINT [FK_ProductoAtributos_Productos] FOREIGN KEY ([ProductId]) REFERENCES [dbo].[Products] ([Id])
 );
+
+
 
