@@ -7,16 +7,22 @@ using System.Threading.Tasks;
 
 namespace AgroEnsayos.Domain.Infraestructure.Repositories
 {
-    interface IRepository<T> where T: class, new()
+    public interface IRepository<T> where T: class, new()
     {
-        List<T> GetAll();
-        List<T> GetAll(List<Expression<Func<T, object>>> includes);
+        bool Any(Expression<Func<T, bool>> predicate);
 
         T Single(Expression<Func<T, bool>> predicate);
-        T Single(Expression<Func<T, bool>> predicate, List<Expression<Func<T, object>>> includes);
+        T Single(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
+
+        List<T> GetAll();
+        List<T> GetAll(int page, int pagesize);
+        List<T> GetAll(params Expression<Func<T, object>>[] includes);
+        List<T> GetAll(int page, int pagesize, params Expression<Func<T, object>>[] includes);
 
         List<T> Get(Expression<Func<T, bool>> predicate);
-        List<T> Get(Expression<Func<T, bool>> predicate, List<Expression<Func<T, object>>> includes);
+        List<T> Get(int page, int pagesize, Expression<Func<T, bool>> predicate);
+        List<T> Get(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
+        List<T> Get(int page, int pagesize, Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
 
         void Insert(T entity);
         void Update(T entity);

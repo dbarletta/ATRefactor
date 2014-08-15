@@ -12,45 +12,22 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
 {
     public abstract class RepositoryBase<T> : IRepository<T> where T: class, new()
     {
-        private IDataContextFactory _factory;
+        protected IDataContextFactory _factory;
 
         public RepositoryBase(IDataContextFactory factory)
         {
             _factory = factory;
         }
 
-        public List<T> GetAll()
+
+        public bool Any(Expression<Func<T, bool>> predicate)
         {
             using (var db = _factory.Create())
             {
-                return (List<T>)db.Set<T>().ToList();
+                return db.Set<T>().Any(predicate);
             }
         }
-
-        public List<T> GetAll(List<Expression<Func<T, object>>> includes)
-        {
-            List<string> includelist = new List<string>();
-
-            foreach (var item in includes)
-            {
-                MemberExpression body = item.Body as MemberExpression;
-                if (body == null)
-                    throw new ArgumentException("The body must be a member expression");
-
-                includelist.Add(body.Member.Name);
-            }
-
-            using (var db = _factory.Create())
-            {
-                DbQuery<T> query = db.Set<T>();
-
-                includelist.ForEach(x => query = query.Include(x));
-
-                return (List<T>)query.ToList();
-            }
-
-        }
-
+        
 
         public T Single(Expression<Func<T, bool>> predicate)
         {
@@ -60,7 +37,7 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
             }
         }
 
-        public T Single(Expression<Func<T, bool>> predicate, List<Expression<Func<T, object>>> includes)
+        public T Single(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes)
         {
             List<string> includelist = new List<string>();
 
@@ -84,6 +61,77 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
         }
 
 
+        public List<T> GetAll()
+        {
+            using (var db = _factory.Create())
+            {
+                return (List<T>)db.Set<T>().ToList();
+            }
+        }
+
+        public List<T> GetAll(int page, int pagesize)
+        {
+            using (var db = _factory.Create())
+            {
+                return (List<T>)db.Set<T>()
+                                  .Skip(pagesize * (page - 1))
+                                  .Take(pagesize)
+                                  .ToList();
+            }
+        }
+
+        public List<T> GetAll(params Expression<Func<T, object>>[] includes)
+        {
+            List<string> includelist = new List<string>();
+
+            foreach (var item in includes)
+            {
+                MemberExpression body = item.Body as MemberExpression;
+                if (body == null)
+                    throw new ArgumentException("The body must be a member expression");
+
+                includelist.Add(body.Member.Name);
+            }
+
+            using (var db = _factory.Create())
+            {
+                DbQuery<T> query = db.Set<T>();
+
+                includelist.ForEach(x => query = query.Include(x));
+
+                return (List<T>)query.ToList();
+            }
+
+        }
+
+        public List<T> GetAll(int page, int pagesize, params Expression<Func<T, object>>[] includes)
+        {
+            List<string> includelist = new List<string>();
+
+            foreach (var item in includes)
+            {
+                MemberExpression body = item.Body as MemberExpression;
+                if (body == null)
+                    throw new ArgumentException("The body must be a member expression");
+
+                includelist.Add(body.Member.Name);
+            }
+
+            using (var db = _factory.Create())
+            {
+                DbQuery<T> query = db.Set<T>();
+
+                includelist.ForEach(x => query = query.Include(x));
+
+                return (List<T>)query.Skip(pagesize * (page - 1))
+                                     .Take(pagesize)
+                                     .ToList();
+            }
+
+        }
+
+
+
         public List<T> Get(Expression<Func<T, bool>> predicate)
         {
             using (var db = _factory.Create())
@@ -92,7 +140,19 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
             }
         }
 
-        public List<T> Get(Expression<Func<T, bool>> predicate, List<Expression<Func<T, object>>> includes)
+        public List<T> Get(int page, int pagesize, Expression<Func<T, bool>> predicate)
+        {
+            using (var db = _factory.Create())
+            {
+                return (List<T>)db.Set<T>()
+                                  .Where(predicate)
+                                  .Skip(pagesize * (page - 1))
+                                  .Take(pagesize)
+                                  .ToList();
+            }
+        }
+
+        public List<T> Get(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes)
         {
             List<string> includelist = new List<string>();
 
@@ -112,6 +172,32 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
                 includelist.ForEach(x => query = query.Include(x));
 
                 return (List<T>)query.Where(predicate).ToList();
+            }
+        }
+
+        public List<T> Get(int page, int pagesize, Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes)
+        {
+            List<string> includelist = new List<string>();
+
+            foreach (var item in includes)
+            {
+                MemberExpression body = item.Body as MemberExpression;
+                if (body == null)
+                    throw new ArgumentException("The body must be a member expression");
+
+                includelist.Add(body.Member.Name);
+            }
+
+            using (var db = _factory.Create())
+            {
+                DbQuery<T> query = db.Set<T>();
+
+                includelist.ForEach(x => query = query.Include(x));
+
+                return (List<T>)query.Where(predicate)
+                                     .Skip(pagesize * (page - 1))
+                                     .Take(pagesize)
+                                     .ToList();
             }
         }
 
@@ -152,5 +238,6 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
                 db.SaveChanges();
             }
         }
+
     }
 }

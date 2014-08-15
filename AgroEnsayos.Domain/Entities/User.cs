@@ -27,5 +27,17 @@ namespace AgroEnsayos.Domain.Entities
         public bool IsDisabled { get; set; }
 
         public virtual Company Company { get; set; }
+
+        public string Firstname { get; set; }
+
+        public string Lastname { get; set; }
+
+        public string Email { get; set; }
+
+        public string Locality { get; set; }
+
+        public string Province { get; set; }
+
+        public virtual List<Category> CategoriesOfIntrest { get; set; }
     }
 }

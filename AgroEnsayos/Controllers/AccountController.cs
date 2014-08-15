@@ -1,26 +1,35 @@
-﻿namespace AgroEnsayos.Controllers
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Security;
+using AgroEnsayos.Domain.Infraestructure.EF;
+using AgroEnsayos.Domain.Infraestructure.Repositories;
+using AgroEnsayos.Models;
+
+namespace AgroEnsayos.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Web;
-    using System.Web.Mvc;
-    using System.Web.Security;
-
-    using AgroEnsayos.Models;
-    using AgroEnsayos.Services;
-
     public class AccountController : Controller
     {
+        private IUserRepository _userRepository = null;
+        private ICategoryRepository _categoryRepository = null;
+        private IPlaceRepository _placeRepository = null;
+
+        public AccountController()
+        {
+            var ctxFactory = new EFDataContextFactory();
+            _userRepository = new UserRepository(ctxFactory);
+            _categoryRepository = new CategoryRepository(ctxFactory);
+            _placeRepository = new PlaceRepository(ctxFactory);
+        }
+
         [AllowAnonymous]
         public ActionResult Login(string returnUrl)
         {
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
-
-        //
-        // POST: /Account/Login
 
         [HttpPost]
         [AllowAnonymous]
@@ -29,11 +38,11 @@
         {
             if (ModelState.IsValid)
             {
-                AgroEnsayos.Entities.User user = AgroEnsayos.Services.AuthenticationService.ValidateUser(model.Name, model.Password);
+                Domain.Entities.User user = _userRepository.Single(x => x.Name == model.Name && x.Password == model.Password && !x.IsDisabled);
                 if (user != null)
                 {
                     //Roles.AddUserToRoles(model.Name, user.Role.Split(','));
-                    this.Session["EmpresaId"] = user.EmpresaId;
+                    this.Session["CompanyId"] = user.CompanyId;
                     FormsAuthentication.RedirectFromLoginPage(model.Name, model.RememberMe);
                     RedirectToLocal(returnUrl);
                 }
@@ -49,23 +58,20 @@
         [AllowAnonymous]
         public ActionResult NewUser()
         {
-            ViewBag.Categorias = CategoriaService.Get().Where(x => x.PadreId.HasValue && (x.Padre.Equals("Semillas") || x.Padre.Equals("Fitosanitarios"))).ToList();
+            ViewBag.Categorias = _categoryRepository.Get(x => 
+                x.Parent.Name.Equals("Semillas", StringComparison.InvariantCultureIgnoreCase) ||
+                x.Parent.Name.Equals("Fitosanitarios", StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
 
             return View();
         }
 
+        //TODO: Ver de enviar el user completo con las categorias desde la UI
         [Authorize()]
         [AllowAnonymous]
-        public ActionResult SaveUser(string name, string password, string nombre, string apellido, string localidad, string provincia, string empresa, string email, List<string> cultivos)
+        public ActionResult SaveUser(Domain.Entities.User user)
         {
-            int newUserId;
-            int itemId;
-            newUserId=AuthenticationService.User_Insert(name, password, nombre, apellido, localidad, provincia, empresa, email, "cliente");
-
-            foreach (string item in cultivos)
-            {
-                itemId = AuthenticationService.UserCategoria_Insert(newUserId, Convert.ToInt32(item));
-            }
+            _userRepository.SaveGraph(user);
 
             return RedirectToAction("LogIn", "Account",null);
         }
@@ -74,8 +80,9 @@
         [AllowAnonymous]
         public JsonResult GetLocalidades_x_prov(string provincia = "Capital Federal")
         {
-
-            List<string> localidades = LugarService.GetLocalidades_x_prov(provincia);
+            List<string> localidades = _placeRepository.Get(x => x.Province == provincia)
+                                                       .Select(x => x.Locality)
+                                                       .ToList();
 
             return Json(new AgroEnsayos.Helpers.JsonResultObject { haserror = false, message = provincia != "" ? "Existe" : "No Existe", result = localidades });
 
@@ -96,7 +103,7 @@
         public JsonResult UserExists(string name)
         {
             int res = 0;
-            if (AuthenticationService.UserExists(name))
+            if (_userRepository.Any(x => x.Name == name))
             {
                 res = 1;
             }

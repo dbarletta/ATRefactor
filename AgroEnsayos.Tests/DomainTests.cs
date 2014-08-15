@@ -40,5 +40,22 @@ namespace AgroEnsayos.Tests
             var query = repo.Get(x => x.Family.Contains("Tecno"));
 
         }
+
+        [TestMethod]
+        public void PabloTest()
+        {
+            using (var ctx = new DbAgrotool())
+            {
+                var q = from p in ctx.Products
+                        join c in ctx.Companies on p.CompanyId equals c.Id
+                        where p.Category.Name.Equals("Soja", StringComparison.InvariantCultureIgnoreCase)
+                            && p.Cycle.ToLower().Contains("cor")
+                        orderby p.Id descending
+                        select new { p.Id, p.Name };
+
+                var res = q.ToList();
+            }
+        }
+
     }
 }

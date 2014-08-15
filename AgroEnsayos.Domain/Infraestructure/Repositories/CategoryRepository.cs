@@ -7,11 +7,11 @@ using AgroEnsayos.Domain.Entities;
 
 namespace AgroEnsayos.Domain.Infraestructure.Repositories
 {
-    public interface IAttributeRepository : IRepository<Entities.Attribute> { }
+    public interface ICategoryRepository : IRepository<Category> { }
 
-    public class AttributeRepository : RepositoryBase<Entities.Attribute>, IAttributeRepository
+    public class CategoryRepository : RepositoryBase<Category>, ICategoryRepository
     {
-        public AttributeRepository(IDataContextFactory factory)
+        public CategoryRepository(IDataContextFactory factory)
             : base(factory)
         {
 

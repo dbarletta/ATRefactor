@@ -23,6 +23,8 @@ namespace AgroEnsayos.Domain.Entities
         [StringLength(50)]
         public string Name { get; set; }
 
+        public virtual Category Parent { get; set; }
+
         public virtual ICollection<Campaign> Campaigns { get; set; }
 
         public virtual ICollection<Product> Products { get; set; }

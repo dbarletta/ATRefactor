@@ -51,7 +51,7 @@ namespace AgroEnsayos.Domain.Entities
         [Column(TypeName = "date")]
         public DateTime? EntryDate { get; set; }
 
-        public bool IsDisabled { get; set; }
+        public bool IsDisabled { get; private set; }
 
         public virtual Category Category { get; set; }
 
@@ -62,5 +62,17 @@ namespace AgroEnsayos.Domain.Entities
         public virtual ICollection<AttributeMapping> AttributeMappings { get; set; }
 
         public virtual ICollection<Place> Places { get; set; }
+
+        /// <summary>
+        /// Disables the current product and updates the mappings
+        /// </summary>
+        public void Disable()
+        {
+            this.IsDisabled = true;
+            foreach(var map in AttributeMappings)
+            {
+                map.OriginalValue = null;
+            }
+        }
     }
 }
