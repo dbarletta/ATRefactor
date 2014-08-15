@@ -1,5 +1,4 @@
-﻿using AgroEnsayos.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -48,7 +47,8 @@ namespace AgroEnsayos
 
         public override string[] GetRolesForUser(string username)
         {
-            return AuthenticationService.GetRoleForUser(username);
+            throw new NotImplementedException();
+            //return AuthenticationService.GetRoleForUser(username);
         }
 
         public override string[] GetUsersInRole(string roleName)
@@ -58,15 +58,16 @@ namespace AgroEnsayos
 
         public override bool IsUserInRole(string username, string roleName)
         {
-            string[] roles = AuthenticationService.GetRoleForUser(username);
-            if (roles.Length > 0 && roles.Contains(roleName))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            throw new NotImplementedException();
+            //string[] roles = AuthenticationService.GetRoleForUser(username);
+            //if (roles.Length > 0 && roles.Contains(roleName))
+            //{
+            //    return true;
+            //}
+            //else
+            //{
+            //    return false;
+            //}
         }
 
         public override void RemoveUsersFromRoles(string[] usernames, string[] roleNames)

@@ -147,7 +147,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\ControllerHelper.cs" />
-    <Compile Include="Models\EquivalenciaModel.cs" />
+    <Compile Include="Models\ProductoLugarCheck.cs" />
     <Compile Include="Models\SearchModel.cs" />
     <Compile Include="Models\LoginModel.cs" />
     <Compile Include="Models\AEMembershipProvider.cs" />

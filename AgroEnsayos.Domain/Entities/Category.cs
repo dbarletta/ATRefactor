@@ -30,5 +30,7 @@ namespace AgroEnsayos.Domain.Entities
         public virtual ICollection<Product> Products { get; set; }
 
         public virtual ICollection<Attribute> Attributes { get; set; }
+
+        public virtual ICollection<User> Users { get; set; }
     }
 }

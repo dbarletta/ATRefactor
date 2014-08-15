@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Security;
-using AgroEnsayos.Services;
 
 namespace AgroEnsayos
 {
@@ -24,19 +23,6 @@ namespace AgroEnsayos
         public override bool ChangePassword(string username, string oldPassword, string newPassword)
         {
             throw new NotImplementedException();
-            
-            /*
-            if (!ValidateUser(username, oldPassword) || string.IsNullOrEmpty(newPassword.Trim()))
-                return false;
-
-            User user = repository.GetUser(username);
-            string hash = FormsAuthentication.HashPasswordForStoringInConfigFile(newPassword.Trim(), "md5");
-
-            user.Password = hash;
-            repository.Save();
-
-            return true;
-            */
         }
 
         public override bool ChangePasswordQuestionAndAnswer(string username, string password, string newPasswordQuestion, string newPasswordAnswer)
@@ -167,7 +153,8 @@ namespace AgroEnsayos
             string hash = FormsAuthentication.HashPasswordForStoringInConfigFile(password.Trim(), "md5");
 
             //TODO: implementar el hash
-            return AuthenticationService.ValidateUser(username, password) != null ? true : false;
+            throw new NotImplementedException();
+            //return AuthenticationService.ValidateUser(username, password) != null ? true : false;
         }
     }
 }

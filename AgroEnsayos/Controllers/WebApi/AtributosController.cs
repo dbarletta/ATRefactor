@@ -4,36 +4,46 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using AgroEnsayos.Entities;
-using AgroEnsayos.Services;
+using AgroEnsayos.Domain;
+using AgroEnsayos.Domain.Infraestructure.EF;
+using AgroEnsayos.Domain.Infraestructure.Repositories;
 
 namespace AgroEnsayos.Controllers.WebApi
 {
     public class AtributosController : ApiController
     {
-        // GET api/Atributos
-        public IEnumerable<Atributo> Get()
+        private IAttributeRepository _attributeRepository = null;
+
+        public AtributosController()
         {
-            return AtributoService.Get(0);
+            var ctxFactory = new EFDataContextFactory();
+            _attributeRepository = new AttributeRepository(ctxFactory);
+        }
+
+        // GET api/Atributos
+        public IEnumerable<Domain.Entities.Attribute> Get()
+        {
+            return _attributeRepository.Get(a => !a.IsDisabled);
         }
 
         // GET api/Atributos/5
-        public Atributo Get(int id)
+        public Domain.Entities.Attribute Get(int id)
         {
-            return AtributoService.GetById(id);
+            return _attributeRepository.Single(a => a.Id == id && !a.IsDisabled);
         }
 
         // POST api/Atributos
-        public Atributo Post([FromBody]Atributo attr)
+        public Domain.Entities.Attribute Post([FromBody]Domain.Entities.Attribute attr)
         {
-            AtributoService.Save(attr);
+            _attributeRepository.SaveGraph(attr);
             return attr;
         }
 
         // DELETE api/Atributos/5
         public void Delete(int id)
         {
-            AtributoService.DisableAttributte(id);
+            var attr = _attributeRepository.Single(a => a.Id == id);
+            attr.Disable();
         }
     }
 }

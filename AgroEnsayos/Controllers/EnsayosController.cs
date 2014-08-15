@@ -3,19 +3,36 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using AgroEnsayos.Services;
-using AgroEnsayos.Entities;
 using AgroEnsayos.Models;
 using AgroEnsayos.Helpers;
+using AgroEnsayos.Domain.Infraestructure.Repositories;
+using AgroEnsayos.Domain.Infraestructure.EF;
+using AgroEnsayos.Domain.Entities;
 
 namespace AgroEnsayos.Controllers
 {
     public class EnsayosController : Controller
     {
+        private ITestRepository _testRepository = null;
+        private ICategoryRepository _categoryRepository = null;
+        private IAttributeRepository _attributeRepository = null;
+        private ICompanyRepository _companyRepository = null;
+        private ICampaignRepository _campaignRepository = null;
+
+        public EnsayosController()
+        {
+            var ctxFactory = new EFDataContextFactory();
+            _testRepository = new TestRepository(ctxFactory);
+            _categoryRepository = new CategoryRepository(ctxFactory);
+            _attributeRepository = new AttributeRepository(ctxFactory);
+            _companyRepository = new CompanyRepository(ctxFactory);
+            _campaignRepository = new CampaignRepository(ctxFactory);
+        }
+
         [Authorize()]
         public ActionResult Index()
         {
-            ViewBag.Ensayos = EnsayoService.Get(4).ToList();
+            ViewBag.Ensayos = _testRepository.Get(t => t.Product.CategoryId == 4).ToList();
             return View();
         }
 
@@ -97,23 +114,23 @@ namespace AgroEnsayos.Controllers
             if (cond_localidad != "")
                 cond_localidad = cond_localidad + ",";
 
-            ///////////// Obtener Productos x Filtros /////////////
+            ///////////// Obtener Ensayos x Filtros /////////////
             if (ProductoId != 0)
             {
-                model.Ensayos = EnsayoService.Get(model.CategoriaIdEnsayos, ProductoId);
+                model.Tests = _testRepository.Get(t => t.Product.CategoryId == model.CategoriaIdEnsayos && t.ProductId == ProductoId);
             }
             else
             {
-                model.Ensayos = EnsayoService.Lookup(model.CategoriaIdEnsayos, model.BuscarEnsayos, cond_empresa, cond_fuente, cond_provincia, cond_localidad, cond_campana, list_atributo);
+                model.Tests = _testRepository.Lookup(model.CategoriaIdEnsayos, model.BuscarEnsayos, cond_empresa, cond_fuente, cond_provincia, cond_localidad, cond_campana, list_atributo);
             }
 
-            model.Categoria = "NN";
-            List<Categoria> ar_c = CategoriaService.Get();
-            foreach (Categoria c in ar_c)
+            model.Category = "NN";
+            List<Category> ar_c = _categoryRepository.GetAll();
+            foreach (Category c in ar_c)
             {
                 if (c.Id == model.CategoriaIdEnsayos)
                 {
-                    model.Categoria = c.Nombre;
+                    model.Category = c.Name;
                 }
             }
 
@@ -124,7 +141,7 @@ namespace AgroEnsayos.Controllers
 
             ////////////////////// Ordenar y Agrupar //////////////////////////////
 
-            if (newSort != "" && model.Ensayos != null)
+            if (newSort != "" && model.Tests != null)
             {
                 switch (newSort)
                 {
@@ -132,22 +149,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenBy(s => s.Campana).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenBy(s => s.Campaign).ToList<Test>();
                                 break;
                             case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenBy(s => s.Campana).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenBy(s => s.Campaign.Name).ToList<Test>();
                                 break;
                             case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenBy(s => s.Campana).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenBy(s => s.Campaign.Name).ToList<Test>();
                                 break;
                             case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenBy(s => s.Campana).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenBy(s => s.Campaign.Name).ToList<Test>();
                                 break;
                             case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenBy(s => s.Campana).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenBy(s => s.Campaign).ToList<Test>();
                                 break;
                             default:
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ToList<Test>();
                                 break;
                         }
                         break;
@@ -155,22 +172,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenBy(s => s.Producto).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenBy(s => s.Product.Name).ToList<Test>();
                                 break;
                             case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenBy(s => s.Producto).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenBy(s => s.Product.Name).ToList<Test>();
                                 break;
                             case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenBy(s => s.Producto).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenBy(s => s.Product.Name).ToList<Test>();
                                 break;
                             case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenBy(s => s.Producto).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenBy(s => s.Product.Name).ToList<Test>();
                                 break;
                             case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenBy(s => s.Producto).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenBy(s => s.Product.Name).ToList<Test>();
                                 break;
                             default:
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ToList<Test>();
                                 break;
                         }
                         break;
@@ -178,22 +195,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenBy(s => s.Fuente).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenBy(s => s.Source).ToList<Test>();
                                 break;
                             case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenBy(s => s.Fuente).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenBy(s => s.Source).ToList<Test>();
                                 break;
                             case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenBy(s => s.Fuente).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenBy(s => s.Source).ToList<Test>();
                                 break;
                             case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenBy(s => s.Fuente).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenBy(s => s.Source).ToList<Test>();
                                 break;
                             case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenBy(s => s.Fuente).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenBy(s => s.Source).ToList<Test>();
                                 break;
                             default:
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Source).ToList<Test>();
                                 break;
                         }
                         break;
@@ -201,22 +218,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenBy(s => s.Provincia).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenBy(s => s.Place.Province).ToList<Test>();
                                 break;
                             case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenBy(s => s.Provincia).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenBy(s => s.Place.Province).ToList<Test>();
                                 break;
                             case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenBy(s => s.Provincia).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenBy(s => s.Place.Province).ToList<Test>();
                                 break;
                             case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenBy(s => s.Provincia).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenBy(s => s.Place.Province).ToList<Test>();
                                 break;
                             case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenBy(s => s.Provincia).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenBy(s => s.Place.Province).ToList<Test>();
                                 break;
                             default:
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ToList<Test>();
                                 break;
                         }
                         break;
@@ -224,22 +241,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenBy(s => s.Localidad).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenBy(s => s.Place.Locality).ToList<Test>();
                                 break;
                             case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenBy(s => s.Localidad).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenBy(s => s.Place.Locality).ToList<Test>();
                                 break;
                             case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenBy(s => s.Localidad).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenBy(s => s.Place.Locality).ToList<Test>();
                                 break;
                             case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenBy(s => s.Localidad).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenBy(s => s.Place.Locality).ToList<Test>();
                                 break;
                             case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenBy(s => s.Localidad).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenBy(s => s.Place.Locality).ToList<Test>();
                                 break;
                             default:
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ToList<Test>();
                                 break;
                         }
                         break;
@@ -247,22 +264,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenBy(s => s.Rinde).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenBy(s => s.Yield).ToList<Test>();
                                 break;
                             case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenBy(s => s.Rinde).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenBy(s => s.Yield).ToList<Test>();
                                 break;
                             case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenBy(s => s.Rinde).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenBy(s => s.Yield).ToList<Test>();
                                 break;
                             case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenBy(s => s.Rinde).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenBy(s => s.Yield).ToList<Test>();
                                 break;
                             case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenBy(s => s.Rinde).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenBy(s => s.Yield).ToList<Test>();
                                 break;
                             default:
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Yield).ToList<Test>();
                                 break;
                         }
                         break;
@@ -271,22 +288,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenByDescending(s => s.Campana).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenByDescending(s => s.Campaign).ToList<Test>();
                                 break;
                             case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenByDescending(s => s.Campana).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenByDescending(s => s.Campaign).ToList<Test>();
                                 break;
                             case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenByDescending(s => s.Campana).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenByDescending(s => s.Campaign).ToList<Test>();
                                 break;
                             case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenByDescending(s => s.Campana).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenByDescending(s => s.Campaign).ToList<Test>();
                                 break;
                             case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenByDescending(s => s.Campana).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenByDescending(s => s.Campaign).ToList<Test>();
                                 break;
                             default:
-                                model.Ensayos = model.Ensayos.OrderByDescending(s => s.Campana).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderByDescending(s => s.Campaign).ToList<Test>();
                                 break;
                         }
                         break;
@@ -294,22 +311,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenByDescending(s => s.Producto).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenByDescending(s => s.Product.Name).ToList<Test>();
                                 break;
                             case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenByDescending(s => s.Producto).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenByDescending(s => s.Product.Name).ToList<Test>();
                                 break;
                             case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenByDescending(s => s.Producto).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenByDescending(s => s.Product.Name).ToList<Test>();
                                 break;
                             case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenByDescending(s => s.Producto).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenByDescending(s => s.Product.Name).ToList<Test>();
                                 break;
                             case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenByDescending(s => s.Producto).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenByDescending(s => s.Product.Name).ToList<Test>();
                                 break;
                             default:
-                                model.Ensayos = model.Ensayos.OrderByDescending(s => s.Producto).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderByDescending(s => s.Product.Name).ToList<Test>();
                                 break;
                         }
                         break;
@@ -317,22 +334,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenByDescending(s => s.Fuente).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenByDescending(s => s.Source).ToList<Test>();
                                 break;
                             case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenByDescending(s => s.Fuente).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenByDescending(s => s.Source).ToList<Test>();
                                 break;
                             case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenByDescending(s => s.Fuente).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenByDescending(s => s.Source).ToList<Test>();
                                 break;
                             case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenByDescending(s => s.Fuente).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenByDescending(s => s.Source).ToList<Test>();
                                 break;
                             case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenByDescending(s => s.Fuente).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenByDescending(s => s.Source).ToList<Test>();
                                 break;
                             default:
-                                model.Ensayos = model.Ensayos.OrderByDescending(s => s.Fuente).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderByDescending(s => s.Source).ToList<Test>();
                                 break;
                         }
                         break;
@@ -340,22 +357,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenByDescending(s => s.Provincia).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenByDescending(s => s.Place.Province).ToList<Test>();
                                 break;
                             case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenByDescending(s => s.Provincia).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenByDescending(s => s.Place.Province).ToList<Test>();
                                 break;
                             case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenByDescending(s => s.Provincia).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenByDescending(s => s.Place.Province).ToList<Test>();
                                 break;
                             case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenByDescending(s => s.Provincia).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenByDescending(s => s.Place.Province).ToList<Test>();
                                 break;
                             case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenByDescending(s => s.Provincia).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenByDescending(s => s.Place.Province).ToList<Test>();
                                 break;
                             default:
-                                model.Ensayos = model.Ensayos.OrderByDescending(s => s.Provincia).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderByDescending(s => s.Place.Province).ToList<Test>();
                                 break;
                         }
                         break;
@@ -363,22 +380,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenByDescending(s => s.Localidad).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenByDescending(s => s.Place.Locality).ToList<Test>();
                                 break;
                             case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenByDescending(s => s.Localidad).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenByDescending(s => s.Place.Locality).ToList<Test>();
                                 break;
                             case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenByDescending(s => s.Localidad).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenByDescending(s => s.Place.Locality).ToList<Test>();
                                 break;
                             case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenByDescending(s => s.Localidad).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenByDescending(s => s.Place.Locality).ToList<Test>();
                                 break;
                             case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenByDescending(s => s.Localidad).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenByDescending(s => s.Place.Locality).ToList<Test>();
                                 break;
                             default:
-                                model.Ensayos = model.Ensayos.OrderByDescending(s => s.Localidad).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderByDescending(s => s.Place.Locality).ToList<Test>();
                                 break;
                         }
                         break;
@@ -386,22 +403,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenByDescending(s => s.Rinde).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenByDescending(s => s.Yield).ToList<Test>();
                                 break;
                             case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenByDescending(s => s.Rinde).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenByDescending(s => s.Yield).ToList<Test>();
                                 break;
                             case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenByDescending(s => s.Rinde).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenByDescending(s => s.Yield).ToList<Test>();
                                 break;
                             case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenByDescending(s => s.Rinde).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenByDescending(s => s.Yield).ToList<Test>();
                                 break;
                             case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenByDescending(s => s.Rinde).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenByDescending(s => s.Yield).ToList<Test>();
                                 break;
                             default:
-                                model.Ensayos = model.Ensayos.OrderByDescending(s => s.Rinde).ToList<Ensayo>();
+                                model.Tests = model.Tests.OrderByDescending(s => s.Yield).ToList<Test>();
                                 break;
                         }
                         break;
@@ -412,20 +429,20 @@ namespace AgroEnsayos.Controllers
 
             }
 
-            if (newSort == "" && oldSort == "" && select_agroup == "" && model.Ensayos != null)
+            if (newSort == "" && oldSort == "" && select_agroup == "" && model.Tests != null)
             {
-                model.Ensayos = model.Ensayos.OrderByDescending(s => s.Rinde).ToList<Ensayo>();
+                model.Tests = model.Tests.OrderByDescending(s => s.Yield).ToList<Test>();
                 oldSort = "rindeDesc";
             }
             //////////////////////////////////////////////////////////////
 
             ///////////// Guardar Parametros /////////////////////
-            ViewBag.Filtros = AtributoService.Filter_Get(model.CategoriaIdEnsayos, 1);
-            ViewBag.Empresas = EmpresaService.Get(0, model.CategoriaIdEnsayos);
-            ViewBag.Provincias = LugarService.GetProvincias(model.CategoriaIdEnsayos);
-            ViewBag.Localidades = LugarService.GetLocalidades(model.CategoriaIdEnsayos);
-            ViewBag.Fuentes = EnsayoService.GetFuentes(model.CategoriaIdEnsayos);
-            ViewBag.Campanas = CampanaService.GetByCategoria(model.CategoriaIdEnsayos);
+            ViewBag.Filtros = _attributeRepository.GetFilters(model.CategoriaIdEnsayos).Distinct();
+            ViewBag.Empresas = _companyRepository.Get(c => !c.IsDisabled && c.Products.Select(p => p.CategoryId).Contains(model.CategoriaIdEnsayos)).Distinct();
+            ViewBag.Provincias = model.Tests.Select(t => t.Place.Province).Distinct();
+            ViewBag.Localidades = model.Tests.Select(t => t.Place.Locality).Distinct();
+            ViewBag.Fuentes = model.Tests.Select(t => t.Source).Distinct();
+            ViewBag.Campanas = _campaignRepository.Get(c => c.CategoryId == model.CategoriaIdEnsayos);
 
             ViewBag.OldSort = oldSort;
             ViewBag.SelectAgroup = select_agroup;
@@ -437,17 +454,17 @@ namespace AgroEnsayos.Controllers
             ViewBag.list_filters = list_filters;
 
             //Paginacion
-            if (model.Ensayos.Count() > limit_fin && model.Ensayos.Count() > limit_ini)
+            if (model.Tests.Count() > limit_fin && model.Tests.Count() > limit_ini)
             {
-                model.Ensayos = model.Ensayos.Skip<Ensayo>(limit_ini).ToList<Ensayo>();
-                model.Ensayos = model.Ensayos.Take(limit_fin).ToList<Ensayo>();
+                model.Tests = model.Tests.Skip<Test>(limit_ini).ToList<Test>();
+                model.Tests = model.Tests.Take(limit_fin).ToList<Test>();
             }
-            else if (model.Ensayos.Count() <= limit_ini)
+            else if (model.Tests.Count() <= limit_ini)
             {
-                model.Ensayos.Clear();
+                model.Tests.Clear();
             }
 
-            return Json(model.Ensayos, JsonRequestBehavior.AllowGet);
+            return Json(model.Tests, JsonRequestBehavior.AllowGet);
 
         }
 
@@ -566,22 +583,23 @@ namespace AgroEnsayos.Controllers
                 cond_localidad = cond_localidad + ",";
 
             ///////////// Obtener Productos x Filtros /////////////
-            
+
+
             if (ProductoId != 0)
             {
-                model.Ensayos = EnsayoService.Get(model.CategoriaIdEnsayos, ProductoId);
+                model.Tests = _testRepository.Get(t => t.Product.CategoryId == model.CategoriaIdEnsayos && t.ProductId == ProductoId);
             }
             else 
             {
-                model.Ensayos = EnsayoService.Lookup(model.CategoriaIdEnsayos, model.BuscarEnsayos, cond_empresa, cond_fuente, cond_provincia, cond_localidad, cond_campana, list_atributo);
+                model.Tests = _testRepository.Lookup(model.CategoriaIdEnsayos, model.BuscarEnsayos, cond_empresa, cond_fuente, cond_provincia, cond_localidad, cond_campana, list_atributo);
             }
             
-            if (model.Ensayos != null && model.Ensayos.Count > 0)
+            if (model.Tests != null && model.Tests.Count > 0)
             {
-                model.Categoria = model.Ensayos.First().Categoria;
+                model.Category = model.Tests.First().Product.Category.Name;
             }
             else
-            { model.Categoria = "Trigo"; }
+            { model.Category = "Trigo"; }
 
             if (select_agroup != "" && newSort == "")
             {
@@ -590,309 +608,25 @@ namespace AgroEnsayos.Controllers
 
             ////////////////////// Ordenar y Agrupar //////////////////////////////
             
-            if (newSort != "" && model.Ensayos != null)
+            if (newSort != "" && model.Tests != null)
             {
-                /*
-                switch (newSort)
-                {
-                    case "campanaAsc":
-                        switch (select_agroup)
-                        {
-                            case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenBy(s => s.Campana).ToList<Ensayo>();
-                                break;
-                            case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenBy(s => s.Campana).ToList<Ensayo>();
-                                break;
-                            case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenBy(s => s.Campana).ToList<Ensayo>();
-                                break;
-                            case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenBy(s => s.Campana).ToList<Ensayo>();
-                                break;
-                            case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenBy(s => s.Campana).ToList<Ensayo>();
-                                break;
-                            default:
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ToList<Ensayo>();
-                                break;
-                        }
-                        break;
-                    case "productoAsc":
-                        switch (select_agroup)
-                        {
-                            case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenBy(s => s.Producto).ToList<Ensayo>();
-                                break;
-                            case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenBy(s => s.Producto).ToList<Ensayo>();
-                                break;
-                            case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenBy(s => s.Producto).ToList<Ensayo>();
-                                break;
-                            case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenBy(s => s.Producto).ToList<Ensayo>();
-                                break;
-                            case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenBy(s => s.Producto).ToList<Ensayo>();
-                                break;
-                            default:
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ToList<Ensayo>();
-                                break;
-                        }
-                        break;
-                    case "fuenteAsc":
-                        switch (select_agroup)
-                        {
-                            case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenBy(s => s.Fuente).ToList<Ensayo>();
-                                break;
-                            case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenBy(s => s.Fuente).ToList<Ensayo>();
-                                break;
-                            case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenBy(s => s.Fuente).ToList<Ensayo>();
-                                break;
-                            case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenBy(s => s.Fuente).ToList<Ensayo>();
-                                break;
-                            case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenBy(s => s.Fuente).ToList<Ensayo>();
-                                break;
-                            default:
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ToList<Ensayo>();
-                                break;
-                        }
-                        break;
-                    case "provinciaAsc":
-                        switch (select_agroup)
-                        {
-                            case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenBy(s => s.Provincia).ToList<Ensayo>();
-                                break;
-                            case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenBy(s => s.Provincia).ToList<Ensayo>();
-                                break;
-                            case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenBy(s => s.Provincia).ToList<Ensayo>();
-                                break;
-                            case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenBy(s => s.Provincia).ToList<Ensayo>();
-                                break;
-                            case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenBy(s => s.Provincia).ToList<Ensayo>();
-                                break;
-                            default:
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ToList<Ensayo>();
-                                break;
-                        }
-                        break;
-                    case "localidadAsc":
-                        switch (select_agroup)
-                        {
-                            case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenBy(s => s.Localidad).ToList<Ensayo>();
-                                break;
-                            case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenBy(s => s.Localidad).ToList<Ensayo>();
-                                break;
-                            case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenBy(s => s.Localidad).ToList<Ensayo>();
-                                break;
-                            case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenBy(s => s.Localidad).ToList<Ensayo>();
-                                break;
-                            case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenBy(s => s.Localidad).ToList<Ensayo>();
-                                break;
-                            default:
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ToList<Ensayo>();
-                                break;
-                        }
-                        break;
-                    case "rindeAsc":
-                        switch (select_agroup)
-                        {
-                            case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenBy(s => s.Rinde).ToList<Ensayo>();
-                                break;
-                            case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenBy(s => s.Rinde).ToList<Ensayo>();
-                                break;
-                            case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenBy(s => s.Rinde).ToList<Ensayo>();
-                                break;
-                            case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenBy(s => s.Rinde).ToList<Ensayo>();
-                                break;
-                            case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenBy(s => s.Rinde).ToList<Ensayo>();
-                                break;
-                            default:
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ToList<Ensayo>();
-                                break;
-                        }
-                        break;
-
-                    case "campanaDesc":
-                        switch (select_agroup)
-                        {
-                            case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenByDescending(s => s.Campana).ToList<Ensayo>();
-                                break;
-                            case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenByDescending(s => s.Campana).ToList<Ensayo>();
-                                break;
-                            case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenByDescending(s => s.Campana).ToList<Ensayo>();
-                                break;
-                            case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenByDescending(s => s.Campana).ToList<Ensayo>();
-                                break;
-                            case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenByDescending(s => s.Campana).ToList<Ensayo>();
-                                break;
-                            default:
-                                model.Ensayos = model.Ensayos.OrderByDescending(s => s.Campana).ToList<Ensayo>();
-                                break;
-                        }
-                        break;
-                    case "productoDesc":
-                        switch (select_agroup)
-                        {
-                            case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenByDescending(s => s.Producto).ToList<Ensayo>();
-                                break;
-                            case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenByDescending(s => s.Producto).ToList<Ensayo>();
-                                break;
-                            case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenByDescending(s => s.Producto).ToList<Ensayo>();
-                                break;
-                            case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenByDescending(s => s.Producto).ToList<Ensayo>();
-                                break;
-                            case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenByDescending(s => s.Producto).ToList<Ensayo>();
-                                break;
-                            default:
-                                model.Ensayos = model.Ensayos.OrderByDescending(s => s.Producto).ToList<Ensayo>();
-                                break;
-                        }
-                        break;
-                    case "fuenteDesc":
-                        switch (select_agroup)
-                        {
-                            case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenByDescending(s => s.Fuente).ToList<Ensayo>();
-                                break;
-                            case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenByDescending(s => s.Fuente).ToList<Ensayo>();
-                                break;
-                            case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenByDescending(s => s.Fuente).ToList<Ensayo>();
-                                break;
-                            case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenByDescending(s => s.Fuente).ToList<Ensayo>();
-                                break;
-                            case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenByDescending(s => s.Fuente).ToList<Ensayo>();
-                                break;
-                            default:
-                                model.Ensayos = model.Ensayos.OrderByDescending(s => s.Fuente).ToList<Ensayo>();
-                                break;
-                        }
-                        break;
-                    case "provinciaDesc":
-                        switch (select_agroup)
-                        {
-                            case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenByDescending(s => s.Provincia).ToList<Ensayo>();
-                                break;
-                            case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenByDescending(s => s.Provincia).ToList<Ensayo>();
-                                break;
-                            case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenByDescending(s => s.Provincia).ToList<Ensayo>();
-                                break;
-                            case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenByDescending(s => s.Provincia).ToList<Ensayo>();
-                                break;
-                            case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenByDescending(s => s.Provincia).ToList<Ensayo>();
-                                break;
-                            default:
-                                model.Ensayos = model.Ensayos.OrderByDescending(s => s.Provincia).ToList<Ensayo>();
-                                break;
-                        }
-                        break;
-                    case "localidadDesc":
-                        switch (select_agroup)
-                        {
-                            case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenByDescending(s => s.Localidad).ToList<Ensayo>();
-                                break;
-                            case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenByDescending(s => s.Localidad).ToList<Ensayo>();
-                                break;
-                            case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenByDescending(s => s.Localidad).ToList<Ensayo>();
-                                break;
-                            case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenByDescending(s => s.Localidad).ToList<Ensayo>();
-                                break;
-                            case "rinde":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Rinde).ThenByDescending(s => s.Localidad).ToList<Ensayo>();
-                                break;
-                            default:
-                                model.Ensayos = model.Ensayos.OrderByDescending(s => s.Localidad).ToList<Ensayo>();
-                                break;
-                        }
-                        break;
-                    case "rindeDesc":
-                        switch (select_agroup)
-                        {
-                            case "producto":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Producto).ThenByDescending(s => s.Rinde).ToList<Ensayo>();
-                                break;
-                            case "campana":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Campana).ThenByDescending(s => s.Rinde).ToList<Ensayo>();
-                                break;
-                            case "fuente":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Fuente).ThenByDescending(s => s.Rinde).ToList<Ensayo>();
-                                break;
-                            case "provincia":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Provincia).ThenByDescending(s => s.Rinde).ToList<Ensayo>();
-                                break;
-                            case "localidad":
-                                model.Ensayos = model.Ensayos.OrderBy(s => s.Localidad).ThenByDescending(s => s.Rinde).ToList<Ensayo>();
-                                break;
-                            default:
-                                model.Ensayos = model.Ensayos.OrderByDescending(s => s.Rinde).ToList<Ensayo>();
-                                break;
-                        }
-                        break;
-
-                }
-            */
                 oldSort = newSort;
-                
             }
 
-            if (newSort == "" && oldSort == "" && select_agroup == "" && model.Ensayos != null)
+            if (newSort == "" && oldSort == "" && select_agroup == "" && model.Tests != null)
             {
-                model.Ensayos = model.Ensayos.OrderByDescending(s => s.Rinde).ToList<Ensayo>();
+                model.Tests = model.Tests.OrderByDescending(s => s.Yield).ToList<Test>();
                 oldSort = "rindeDesc";
             }
             //////////////////////////////////////////////////////////////
 
             ///////////// Guardar Parametros /////////////////////
-            ViewBag.Filtros = AtributoService.Filter_Get(model.CategoriaIdEnsayos,1);
-            ViewBag.Empresas = EmpresaService.Get(0, model.CategoriaIdEnsayos);
-            ViewBag.Provincias = LugarService.GetProvincias(model.CategoriaIdEnsayos);
-            ViewBag.Localidades = LugarService.GetLocalidades(model.CategoriaIdEnsayos);
-            ViewBag.Fuentes = EnsayoService.GetFuentes(model.CategoriaIdEnsayos);
-            ViewBag.Campanas = CampanaService.GetByCategoria(model.CategoriaIdEnsayos);
+            ViewBag.Filtros = _attributeRepository.GetFilters(model.CategoriaIdEnsayos).Distinct();
+            ViewBag.Empresas = _companyRepository.Get(c => !c.IsDisabled && c.Products.Select(p => p.CategoryId).Contains(model.CategoriaIdEnsayos)).Distinct();
+            ViewBag.Provincias = model.Tests.Select(t => t.Place.Province).Distinct();
+            ViewBag.Localidades = model.Tests.Select(t => t.Place.Locality).Distinct();
+            ViewBag.Fuentes = model.Tests.Select(t => t.Source).Distinct();
+            ViewBag.Campanas = _campaignRepository.Get(c => c.CategoryId == model.CategoriaIdEnsayos);
             
             ViewBag.OldSort = oldSort;
             ViewBag.SelectAgroup = select_agroup;
@@ -906,11 +640,12 @@ namespace AgroEnsayos.Controllers
             return View(model);
         }
 
+        //TODO: Completar;
         [Authorize()]
         [HttpGet()]
         public string GetChartData(int categoriaId, int campanaId, int lugarId, string fuente)
         {
-            return EnsayoService.Get(categoriaId, null, campanaId, lugarId, fuente, true).ToJson();
+            return string.Empty; //EnsayoService.Get(categoriaId, null, campanaId, lugarId, fuente, true).ToJson();
         }
     }
 }

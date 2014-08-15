@@ -4,17 +4,25 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using AgroEnsayos.Entities;
-using AgroEnsayos.Services;
+using AgroEnsayos.Domain.Entities;
+using AgroEnsayos.Domain.Infraestructure.EF;
+using AgroEnsayos.Domain.Infraestructure.Repositories;
 
 namespace AgroEnsayos.Controllers.WebApi
 {
     public class EmpresasController : ApiController
     {
-        // GET api/empresas
-        public List<Empresa> Get()
+        private ICompanyRepository _companyRepository = null;
+
+        public EmpresasController()
         {
-            return EmpresaService.Get();
+            var ctxFactory = new EFDataContextFactory();
+            _companyRepository = new CompanyRepository(ctxFactory);
+        }
+        // GET api/empresas
+        public List<Company> Get()
+        {
+            return _companyRepository.Get(c => !c.IsDisabled);
         }
 
         // GET api/empresas/5

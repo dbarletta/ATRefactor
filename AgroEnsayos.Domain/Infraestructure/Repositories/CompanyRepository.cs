@@ -7,11 +7,11 @@ using AgroEnsayos.Domain.Entities;
 
 namespace AgroEnsayos.Domain.Infraestructure.Repositories
 {
-    public interface ICampaignRepository : IRepository<Campaign> { }
+    public interface ICompanyRepository : IRepository<Company> { }
 
-    public class CampaignRepository : RepositoryBase<Campaign>, ICampaignRepository
+    public class CompanyRepository : RepositoryBase<Company>, ICompanyRepository
     {
-        public CampaignRepository(IDataContextFactory factory)
+        public CompanyRepository(IDataContextFactory factory)
             : base(factory)
         {
 

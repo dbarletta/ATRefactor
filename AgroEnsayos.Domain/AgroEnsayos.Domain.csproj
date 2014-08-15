@@ -69,6 +69,7 @@
     <Compile Include="Entities\User.cs" />
     <Compile Include="Infraestructure\EF\EFDataContextFactory.cs" />
     <Compile Include="Infraestructure\Repositories\PlacesRepository.cs" />
+    <Compile Include="Infraestructure\Repositories\TestRepository.cs" />
     <Compile Include="Infraestructure\Repositories\UserRepository.cs" />
     <Compile Include="Infraestructure\Repositories\CampaignRepository.cs" />
     <Compile Include="Infraestructure\Repositories\CategoryRepository.cs" />

@@ -4,17 +4,25 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using AgroEnsayos.Entities;
-using AgroEnsayos.Services;
+using AgroEnsayos.Domain.Entities;
+using AgroEnsayos.Domain.Infraestructure.EF;
+using AgroEnsayos.Domain.Infraestructure.Repositories;
 
 namespace AgroEnsayos.Controllers.WebApi
 {
     public class CategoriasController : ApiController
     {
-        // GET api/categorias
-        public List<Categoria> Get()
+        private ICategoryRepository _categoryRepository = null;
+
+        public CategoriasController()
         {
-            return CategoriaService.Get().Where(c => c.PadreId.HasValue && c.PadreId.Value == 1).ToList();
+            var ctxFactory = new EFDataContextFactory();
+            _categoryRepository = new CategoryRepository(ctxFactory);
+        }
+        // GET api/categorias
+        public List<Category> Get()
+        {
+            return _categoryRepository.Get(c => c.ParentId == 1).ToList();
         }
 
         // GET api/categorias/5

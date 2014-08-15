@@ -113,7 +113,7 @@ namespace AgroEnsayos.Controllers
         //TODO: Cambiar este metodo en la UI por SaveProductoAtributos
         public void SaveWithMappings(Product product)
         {
-            _productRepository.SaveWithMappings(product);
+            _productRepository.SaveGraph(product);
         }
 
         #endregion

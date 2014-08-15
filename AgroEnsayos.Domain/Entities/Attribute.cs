@@ -30,10 +30,15 @@ namespace AgroEnsayos.Domain.Entities
 
         public bool IsFilter { get; set; }
 
-        public bool IsDisabled { get; set; }
+        public bool IsDisabled { get; private set; }
 
         public virtual ICollection<AttributeMapping> AttributeMappings { get; set; }
 
         public virtual ICollection<Category> Categories { get; set; }
+
+        public void Disable()
+        {
+            this.IsDisabled = true;
+        }
     }
 }

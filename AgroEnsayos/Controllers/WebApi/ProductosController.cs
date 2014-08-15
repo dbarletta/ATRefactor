@@ -1,40 +1,52 @@
-﻿using AgroEnsayos.Entities;
-using AgroEnsayos.Services;
-using NLog;
+﻿using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Http;
+using AgroEnsayos.Domain.Infraestructure.Repositories;
+using AgroEnsayos.Domain.Entities;
+using AgroEnsayos.Domain.Infraestructure.EF;
+using AgroEnsayos.Models;
 
 namespace AgroEnsayos.Controllers.WebApi
 {
     public class ProductosController : ApiController
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static Logger logger = null;
+        private IProductRepository _productRepository = null;
+        private IPlaceRepository _placeRepository = null;
+
+        public ProductosController()
+        {
+            logger = LogManager.GetCurrentClassLogger();
+            var ctxFactory = new EFDataContextFactory();
+            _productRepository = new ProductRepository(ctxFactory);
+            _placeRepository = new PlaceRepository(ctxFactory);
+        }
 
         #region Producto
         // GET api/productos
-        public IEnumerable<Producto> Get()
+        public IEnumerable<Product> Get()
         {
-            return ProductoService.Get(null, true);
+            return _productRepository.GetAll();
         }
 
         // GET api/productos/5
-        public Producto Get(int id)
+        public Product Get(int id)
         {
-            return ProductoService.Get(null, false, id).First();
+            return _productRepository.Single(p => p.Id == id && !p.IsDisabled);
         }
 
         // POST api/productos
-        public Producto Post([FromBody]Producto prod)
+        public Product Post([FromBody]Product prod)
         {
             try
             {
                 if (prod.Id == 0)
-                    ProductoService.Add(prod);
+                    _productRepository.Insert(prod);
                 else
-                    ProductoService.Edit(prod);
+                    _productRepository.Update(prod);
                 return prod;
             }
             catch(Exception ex)
@@ -47,60 +59,50 @@ namespace AgroEnsayos.Controllers.WebApi
         // DELETE api/productos/5
         public void Delete(int id)
         {
-            ProductoService.DisableProduct(id);
+            var product = _productRepository.Single(p => p.Id == id);
+            product.Disable();
+
+            _productRepository.Update(product);
         }
 
 
         // GET api/productos/?categoryId=5
-        public IEnumerable<Producto> GetByCategory(int categoryId)
+        public IEnumerable<Product> GetByCategory(int categoryId)
         {
-            return ProductoService.Get(categoryId);
+            return _productRepository.Get(p => p.CategoryId == categoryId);
         }
         #endregion
 
         #region ProductoLugares
         public List<ProductoLugarCheck> GetLugares(int productoId)
         {
-            List<ProductoLugares> productosLugares = LugarService.GetProductoLugares(productoId);
-            List<Lugar> lugares = LugarService.GetAllRegiones();
+            var product = _productRepository.Single(p => p.Id == productoId, inc => inc.Places);
 
-            List<ProductoLugarCheck> listado = lugares.Select(l => new ProductoLugarCheck()
+            List<Place> regions = _placeRepository.Get(l => !string.IsNullOrEmpty(l.Region)
+                                                           && string.IsNullOrEmpty(l.Department)
+                                                           && string.IsNullOrEmpty(l.Header));
+
+            List<ProductoLugarCheck> listado = regions.Select(l => new ProductoLugarCheck()
             {
                 LugarId = l.Id,
                 ProductoId = productoId,
                 Region = l.Region,
-                IsChecked = productosLugares.Any(pl => pl.LugarId == l.Id)
+                IsChecked = product.Places.Any(pl => pl.Id == l.Id)
             }).ToList();
 
             return listado;
         }
 
-        public void PostLugares(List<ProductoLugares> lista, int productId)
+        //TODO: Refactor UI con nuevo param
+        public void PostLugares(Product product)
         {
-            ProductoService.SaveProductoLugares(lista, productId);
+            _productRepository.SaveGraph(product);
         } 
         #endregion
 
         #region ProductoAtributos
         
-        //public Producto Get(Producto prod)
-        //{
-        //    prod.Atributos = AtributoService.Atributo_GetWithOriginalValues(prod.Id);
-        //    return prod;
-        //}
 
-        //// POST api/products
-        //public void Post([FromBody]List<Atributo> attributes, int productId)
-        //{
-        //    List<ProductoAtributo> lista = attributes.Select(at => new ProductoAtributo()
-        //    {
-        //        ProductoId = productId,
-        //        AtributoId = at.Id,
-        //        Valor = at.equivalencia_valor,
-
-        //    }).ToList();
-        //    ProductoService.SaveProductoAtributos(lista);
-        //} 
         #endregion
     }
 }

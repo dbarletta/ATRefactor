@@ -91,6 +91,8 @@
     <Build Include="dbo\Tables\Temp_Tests.sql" />
     <Build Include="dbo\Stored Procedures\ResetDatabase.sql" />
     <Build Include="dbo\Stored Procedures\ImportData.sql" />
+    <Build Include="dbo\Stored Procedures\Tests_Lookup.sql" />
+    <Build Include="dbo\Tables\UserCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="AgroEnsayos.Database.refactorlog" />

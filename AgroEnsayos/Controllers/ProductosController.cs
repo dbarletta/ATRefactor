@@ -3,19 +3,41 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using AgroEnsayos.Services;
-using AgroEnsayos.Entities;
+using AgroEnsayos.Domain.Entities;
+using AgroEnsayos.Domain.Infraestructure.EF;
+using AgroEnsayos.Domain.Infraestructure.Repositories;
 using AgroEnsayos.Models;
 
 namespace AgroEnsayos.Controllers
 {
     public class ProductosController : Controller
     {
+        private IProductRepository _productRepository = null;
+        private ICategoryRepository _categoryRepository = null;
+        private IAttributeRepository _attributeRepository = null;
+        private ICompanyRepository _companyRepository = null;
+        private IPlaceRepository _placeRepository = null;
+
+        public ProductosController()
+        {
+            var ctxFactory = new EFDataContextFactory();
+            _productRepository = new ProductRepository(ctxFactory);
+            _categoryRepository = new CategoryRepository(ctxFactory);
+            _attributeRepository = new AttributeRepository(ctxFactory);
+            _companyRepository = new CompanyRepository(ctxFactory);
+            _placeRepository = new PlaceRepository(ctxFactory);
+        }
+
         [Authorize()]
         public ActionResult Admin(int id)
         {
-            ViewBag.Productos = ProductoService.Get(id);
+            ViewBag.Productos = _productRepository.Get(p => p.CategoryId == id);
             return PartialView();
+        }
+
+        public ActionResult Index(int id)
+        {
+            return View();
         }
 
         [Authorize()]
@@ -28,7 +50,6 @@ namespace AgroEnsayos.Controllers
 
             int limit_ini = lastRowId;
             int limit_fin = 30;
-            //var sectionArticles = BLL.SectionArticle.GetNextSectionTopArticles(lastRowId, isHistoryBack);
 
             string cond_empresa = "";
             string cond_antiguedad = "";
@@ -83,17 +104,17 @@ namespace AgroEnsayos.Controllers
             if (cond_antiguedad != "")
                 cond_antiguedad = cond_antiguedad + ",";
 
-            model.Categoria = "NN";
-            List<Categoria> ar_c = CategoriaService.Get();
-            foreach (Categoria c in ar_c)
+            model.Category = "NN";
+            List<Category> ar_c = _categoryRepository.GetAll();
+            foreach (Category c in ar_c)
             {
                 if (c.Id == model.CategoriaIdProductos)
                 {
-                    model.Categoria = c.Nombre;
+                    model.Category = c.Name;
                 }
             }
             ///////////// Obtener Productos x Filtros /////////////
-            model.Productos = ProductoService.Lookup(model.CategoriaIdProductos, model.BuscarProductos, cond_empresa, cond_antiguedad, cond_region, list_atributo);//,limit_ini,limit_fin); //Matias, Comente esta parte de codigo para que compile y asi hacer un deploy.
+            model.Products = _productRepository.Lookup(model.CategoriaIdProductos, model.BuscarProductos, cond_empresa, cond_antiguedad, cond_region, list_atributo);
             
             if (select_agroup != "" && newSort == "")
             {
@@ -101,7 +122,7 @@ namespace AgroEnsayos.Controllers
             }
 
             ////////////////////// Ordenar y Agrupar //////////////////////////////
-            if (newSort != "" && model.Productos != null)
+            if (newSort != "" && model.Products != null)
             {
                 switch (newSort)
                 {
@@ -109,22 +130,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenBy(s => s.Empresa).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Name).ThenBy(s => s.Company.Name).ToList<Product>();
                                 break;
                             case "ciclo":
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ThenBy(s => s.Empresa).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Cycle).ThenBy(s => s.Company.Name).ToList<Product>();
                                 break;
                             case "madurez":
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ThenBy(s => s.Empresa).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.DaysToMaturity).ThenBy(s => s.Company.Name).ToList<Product>();
                                 break;
                             case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenBy(s => s.Empresa).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.PlantHeight).ThenBy(s => s.Company.Name).ToList<Product>();
                                 break;
                             case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenBy(s => s.Empresa).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Material).ThenBy(s => s.Company.Name).ToList<Product>();
                                 break;
                             default:
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Company.Name).ToList<Product>();
                                 break;
                         }
                         break;
@@ -132,22 +153,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenBy(s => s.Nombre).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Company.Name).ThenBy(s => s.Name).ToList<Product>();
                                 break;
                             case "ciclo":
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ThenBy(s => s.Nombre).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Cycle).ThenBy(s => s.Name).ToList<Product>();
                                 break;
                             case "madurez":
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ThenBy(s => s.Nombre).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.DaysToMaturity).ThenBy(s => s.Name).ToList<Product>();
                                 break;
                             case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenBy(s => s.Nombre).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.PlantHeight).ThenBy(s => s.Name).ToList<Product>();
                                 break;
                             case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenBy(s => s.Nombre).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Material).ThenBy(s => s.Name).ToList<Product>();
                                 break;
                             default:
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Name).ToList<Product>();
                                 break;
                         }
                         break;
@@ -155,19 +176,19 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenBy(s => s.Ciclo).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Company.Name).ThenBy(s => s.Cycle).ToList<Product>();
                                 break;
                             case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenBy(s => s.Ciclo).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Name).ThenBy(s => s.Cycle).ToList<Product>();
                                 break;
                             case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenBy(s => s.Ciclo).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.PlantHeight).ThenBy(s => s.Cycle).ToList<Product>();
                                 break;
                             case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenBy(s => s.Ciclo).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Material).ThenBy(s => s.Cycle).ToList<Product>();
                                 break;
                             default:
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Cycle).ToList<Product>();
                                 break;
                         }
                         break;
@@ -175,19 +196,19 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenBy(s => s.DiasMadurez).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Company.Name).ThenBy(s => s.DaysToMaturity).ToList<Product>();
                                 break;
                             case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenBy(s => s.DiasMadurez).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Name).ThenBy(s => s.DaysToMaturity).ToList<Product>();
                                 break;
                             case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenBy(s => s.DiasMadurez).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.PlantHeight).ThenBy(s => s.DaysToMaturity).ToList<Product>();
                                 break;
                             case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenBy(s => s.DiasMadurez).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Material).ThenBy(s => s.DaysToMaturity).ToList<Product>();
                                 break;
                             default:
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.DaysToMaturity).ToList<Product>();
                                 break;
                         }
                         break;
@@ -195,22 +216,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenBy(s => s.AlturaPlanta).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Company.Name).ThenBy(s => s.PlantHeight).ToList<Product>();
                                 break;
                             case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenBy(s => s.AlturaPlanta).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Name).ThenBy(s => s.PlantHeight).ToList<Product>();
                                 break;
                             case "ciclo":
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ThenBy(s => s.AlturaPlanta).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Cycle).ThenBy(s => s.PlantHeight).ToList<Product>();
                                 break;
                             case "madurez":
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ThenBy(s => s.AlturaPlanta).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.DaysToMaturity).ThenBy(s => s.PlantHeight).ToList<Product>();
                                 break;
                             case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenBy(s => s.AlturaPlanta).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Material).ThenBy(s => s.PlantHeight).ToList<Product>();
                                 break;
                             default:
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.PlantHeight).ToList<Product>();
                                 break;
                         }
                         break;
@@ -218,22 +239,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenBy(s => s.Material).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Company.Name).ThenBy(s => s.Material).ToList<Product>();
                                 break;
                             case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenBy(s => s.Material).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Name).ThenBy(s => s.Material).ToList<Product>();
                                 break;
                             case "ciclo":
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ThenBy(s => s.Material).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Cycle).ThenBy(s => s.Material).ToList<Product>();
                                 break;
                             case "madurez":
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ThenBy(s => s.Material).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.DaysToMaturity).ThenBy(s => s.Material).ToList<Product>();
                                 break;
                             case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenBy(s => s.Material).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.PlantHeight).ThenBy(s => s.Material).ToList<Product>();
                                 break;
                             default:
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Material).ToList<Product>();
                                 break;
                         }
                         break;
@@ -241,22 +262,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenByDescending(s => s.Empresa).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Name).ThenByDescending(s => s.Company.Name).ToList<Product>();
                                 break;
                             case "ciclo":
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ThenByDescending(s => s.Empresa).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Cycle).ThenByDescending(s => s.Company.Name).ToList<Product>();
                                 break;
                             case "madurez":
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ThenByDescending(s => s.Empresa).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.DaysToMaturity).ThenByDescending(s => s.Company.Name).ToList<Product>();
                                 break;
                             case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenByDescending(s => s.Empresa).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.PlantHeight).ThenByDescending(s => s.Company.Name).ToList<Product>();
                                 break;
                             case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenByDescending(s => s.Empresa).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Material).ThenByDescending(s => s.Company.Name).ToList<Product>();
                                 break;
                             default:
-                                model.Productos = model.Productos.OrderByDescending(s => s.Empresa).ToList<Producto>();
+                                model.Products = model.Products.OrderByDescending(s => s.Company.Name).ToList<Product>();
                                 break;
                         }
                         break;
@@ -264,22 +285,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenByDescending(s => s.Nombre).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Company.Name).ThenByDescending(s => s.Name).ToList<Product>();
                                 break;
                             case "ciclo":
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ThenByDescending(s => s.Nombre).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Cycle).ThenByDescending(s => s.Name).ToList<Product>();
                                 break;
                             case "madurez":
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ThenByDescending(s => s.Nombre).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.DaysToMaturity).ThenByDescending(s => s.Name).ToList<Product>();
                                 break;
                             case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenByDescending(s => s.Nombre).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.PlantHeight).ThenByDescending(s => s.Name).ToList<Product>();
                                 break;
                             case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenByDescending(s => s.Nombre).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Material).ThenByDescending(s => s.Name).ToList<Product>();
                                 break;
                             default:
-                                model.Productos = model.Productos.OrderByDescending(s => s.Nombre).ToList<Producto>();
+                                model.Products = model.Products.OrderByDescending(s => s.Name).ToList<Product>();
                                 break;
                         }
                         break;
@@ -287,19 +308,19 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenByDescending(s => s.Ciclo).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Company.Name).ThenByDescending(s => s.Cycle).ToList<Product>();
                                 break;
                             case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenByDescending(s => s.Ciclo).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Name).ThenByDescending(s => s.Cycle).ToList<Product>();
                                 break;
                             case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenByDescending(s => s.Ciclo).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.PlantHeight).ThenByDescending(s => s.Cycle).ToList<Product>();
                                 break;
                             case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenByDescending(s => s.Ciclo).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Material).ThenByDescending(s => s.Cycle).ToList<Product>();
                                 break;
                             default:
-                                model.Productos = model.Productos.OrderByDescending(s => s.Ciclo).ToList<Producto>();
+                                model.Products = model.Products.OrderByDescending(s => s.Cycle).ToList<Product>();
                                 break;
                         }
                         break;
@@ -307,19 +328,19 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenByDescending(s => s.DiasMadurez).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Company.Name).ThenByDescending(s => s.DaysToMaturity).ToList<Product>();
                                 break;
                             case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenByDescending(s => s.DiasMadurez).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Name).ThenByDescending(s => s.DaysToMaturity).ToList<Product>();
                                 break;
                             case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenByDescending(s => s.DiasMadurez).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.PlantHeight).ThenByDescending(s => s.DaysToMaturity).ToList<Product>();
                                 break;
                             case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenByDescending(s => s.DiasMadurez).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Material).ThenByDescending(s => s.DaysToMaturity).ToList<Product>();
                                 break;
                             default:
-                                model.Productos = model.Productos.OrderByDescending(s => s.DiasMadurez).ToList<Producto>();
+                                model.Products = model.Products.OrderByDescending(s => s.DaysToMaturity).ToList<Product>();
                                 break;
                         }
                         break;
@@ -327,22 +348,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenByDescending(s => s.AlturaPlanta).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Company.Name).ThenByDescending(s => s.PlantHeight).ToList<Product>();
                                 break;
                             case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenByDescending(s => s.AlturaPlanta).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Name).ThenByDescending(s => s.PlantHeight).ToList<Product>();
                                 break;
                             case "ciclo":
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ThenByDescending(s => s.AlturaPlanta).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Cycle).ThenByDescending(s => s.PlantHeight).ToList<Product>();
                                 break;
                             case "madurez":
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ThenByDescending(s => s.AlturaPlanta).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.DaysToMaturity).ThenByDescending(s => s.PlantHeight).ToList<Product>();
                                 break;
                             case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenByDescending(s => s.AlturaPlanta).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Material).ThenByDescending(s => s.PlantHeight).ToList<Product>();
                                 break;
                             default:
-                                model.Productos = model.Productos.OrderByDescending(s => s.AlturaPlanta).ToList<Producto>();
+                                model.Products = model.Products.OrderByDescending(s => s.PlantHeight).ToList<Product>();
                                 break;
                         }
                         break;
@@ -350,22 +371,22 @@ namespace AgroEnsayos.Controllers
                         switch (select_agroup)
                         {
                             case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenByDescending(s => s.Material).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Company.Name).ThenByDescending(s => s.Material).ToList<Product>();
                                 break;
                             case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenByDescending(s => s.Material).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Name).ThenByDescending(s => s.Material).ToList<Product>();
                                 break;
                             case "ciclo":
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ThenByDescending(s => s.Material).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.Cycle).ThenByDescending(s => s.Material).ToList<Product>();
                                 break;
                             case "madurez":
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ThenByDescending(s => s.Material).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.DaysToMaturity).ThenByDescending(s => s.Material).ToList<Product>();
                                 break;
                             case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenByDescending(s => s.Material).ToList<Producto>();
+                                model.Products = model.Products.OrderBy(s => s.PlantHeight).ThenByDescending(s => s.Material).ToList<Product>();
                                 break;
                             default:
-                                model.Productos = model.Productos.OrderByDescending(s => s.Material).ToList<Producto>();
+                                model.Products = model.Products.OrderByDescending(s => s.Material).ToList<Product>();
                                 break;
                         }
                         break;
@@ -376,25 +397,25 @@ namespace AgroEnsayos.Controllers
 
             }
 
-            if (newSort == "" && oldSort == "" && select_agroup == "" && model.Productos != null)
+            if (newSort == "" && oldSort == "" && select_agroup == "" && model.Products != null)
             {
-                model.Productos = model.Productos.OrderBy(s => s.Nombre).ToList<Producto>();
+                model.Products = model.Products.OrderBy(s => s.Name).ToList<Product>();
                 oldSort = "empresaAsc";
             }
             //////////////////////////////////////////////////////////////
 
             //Paginacion
-            if (model.Productos.Count() > limit_fin && model.Productos.Count() > limit_ini)
+            if (model.Products.Count() > limit_fin && model.Products.Count() > limit_ini)
             {
-                model.Productos = model.Productos.Skip<Producto>(limit_ini).ToList<Producto>();
-                model.Productos = model.Productos.Take(limit_fin).ToList<Producto>();
+                model.Products = model.Products.Skip<Product>(limit_ini).ToList<Product>();
+                model.Products = model.Products.Take(limit_fin).ToList<Product>();
             }
-            else if( model.Productos.Count() <= limit_ini)
+            else if( model.Products.Count() <= limit_ini)
             {
-                model.Productos.Clear();
+                model.Products.Clear();
             }
 
-            return Json(model.Productos, JsonRequestBehavior.AllowGet);
+            return Json(model.Products, JsonRequestBehavior.AllowGet);
         }
 
         [Authorize()]
@@ -484,312 +505,32 @@ namespace AgroEnsayos.Controllers
             if (cond_antiguedad != "")
                 cond_antiguedad = cond_antiguedad + ",";
 
-            model.Categoria = "NN";
-            List<Categoria> ar_c = CategoriaService.Get();
-            foreach(Categoria c in ar_c)
+            model.Category = "NN";
+            List<Category> ar_c = _categoryRepository.GetAll();
+            foreach (Category c in ar_c)
             {
                 if (c.Id == model.CategoriaIdProductos)
                 {
-                    model.Categoria = c.Nombre;
+                    model.Category = c.Name;
                 }
             }
 
             ///////////// Obtener Productos x Filtros /////////////
-            model.Productos = ProductoService.Lookup(model.CategoriaIdProductos, model.BuscarProductos, cond_empresa, cond_antiguedad, cond_region, list_atributo);
+            model.Products = _productRepository.Lookup(model.CategoriaIdProductos, model.BuscarProductos, cond_empresa, cond_antiguedad, cond_region, list_atributo);
 
-            /*
-            if (select_agroup != "" && newSort=="")
-            {
-                newSort = select_agroup + "Asc";
-            }
 
-            ////////////////////// Ordenar y Agrupar //////////////////////////////
-            if (newSort != "" && model.Productos != null)
-            {
-                switch (newSort)
-                {
-                    case "empresaAsc":
-                        switch (select_agroup)
-                        {
-                            case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenBy(s => s.Empresa).ToList<Producto>();
-                                break;
-                            case "ciclo":
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ThenBy(s => s.Empresa).ToList<Producto>();
-                                break;
-                            case "madurez":
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ThenBy(s => s.Empresa).ToList<Producto>();
-                                break;
-                            case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenBy(s => s.Empresa).ToList<Producto>();
-                                break;
-                            case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenBy(s => s.Empresa).ToList<Producto>();
-                                break;
-                            default: 
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ToList<Producto>();
-                                break;
-                        }
-                        break;
-                    case "nombreAsc":
-                        switch (select_agroup)
-                        {
-                            case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenBy(s => s.Nombre).ToList<Producto>();
-                                break;
-                            case "ciclo":
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ThenBy(s => s.Nombre).ToList<Producto>();
-                                break;
-                            case "madurez":
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ThenBy(s => s.Nombre).ToList<Producto>();
-                                break;
-                            case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenBy(s => s.Nombre).ToList<Producto>();
-                                break;
-                            case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenBy(s => s.Nombre).ToList<Producto>();
-                                break;
-                            default:
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ToList<Producto>();
-                                break;
-                        }
-                        break;
-                    case "cicloAsc":
-                        switch (select_agroup)
-                        {
-                            case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenBy(s => s.Ciclo).ToList<Producto>();
-                                break;
-                            case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenBy(s => s.Ciclo).ToList<Producto>();
-                                break;
-                            case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenBy(s => s.Ciclo).ToList<Producto>();
-                                break;
-                            case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenBy(s => s.Ciclo).ToList<Producto>();
-                                break;
-                            default:
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ToList<Producto>();
-                                break;
-                        }
-                        break;
-                    case "madurezAsc":
-                        switch (select_agroup)
-                        {
-                            case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenBy(s => s.DiasMadurez).ToList<Producto>();
-                                break;
-                            case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenBy(s => s.DiasMadurez).ToList<Producto>();
-                                break;
-                            case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenBy(s => s.DiasMadurez).ToList<Producto>();
-                                break;
-                            case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenBy(s => s.DiasMadurez).ToList<Producto>();
-                                break;
-                            default:
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ToList<Producto>();
-                                break;
-                        }
-                        break;
-                    case "alturaAsc":
-                        switch (select_agroup)
-                        {
-                            case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenBy(s => s.AlturaPlanta).ToList<Producto>();
-                                break;
-                            case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenBy(s => s.AlturaPlanta).ToList<Producto>();
-                                break;
-                            case "ciclo":
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ThenBy(s => s.AlturaPlanta).ToList<Producto>();
-                                break;
-                            case "madurez":
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ThenBy(s => s.AlturaPlanta).ToList<Producto>();
-                                break;
-                            case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenBy(s => s.AlturaPlanta).ToList<Producto>();
-                                break;
-                            default:
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ToList<Producto>();
-                                break;
-                        }
-                        break;
-                    case "materialAsc":
-                        switch (select_agroup)
-                        {
-                            case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenBy(s => s.Material).ToList<Producto>();
-                                break;
-                            case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenBy(s => s.Material).ToList<Producto>();
-                                break;
-                            case "ciclo":
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ThenBy(s => s.Material).ToList<Producto>();
-                                break;
-                            case "madurez":
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ThenBy(s => s.Material).ToList<Producto>();
-                                break;
-                            case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenBy(s => s.Material).ToList<Producto>();
-                                break;
-                            default:
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ToList<Producto>();
-                                break;
-                        }
-                        break;
-                    case "empresaDesc":
-                        switch (select_agroup)
-                        {
-                            case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenByDescending(s => s.Empresa).ToList<Producto>();
-                                break;
-                            case "ciclo":
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ThenByDescending(s => s.Empresa).ToList<Producto>();
-                                break;
-                            case "madurez":
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ThenByDescending(s => s.Empresa).ToList<Producto>();
-                                break;
-                            case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenByDescending(s => s.Empresa).ToList<Producto>();
-                                break;
-                            case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenByDescending(s => s.Empresa).ToList<Producto>();
-                                break;
-                            default:
-                                model.Productos = model.Productos.OrderByDescending(s => s.Empresa).ToList<Producto>();
-                                break;
-                        }
-                        break;
-                    case "nombreDesc":
-                        switch (select_agroup)
-                        {
-                            case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenByDescending(s => s.Nombre).ToList<Producto>();
-                                break;
-                            case "ciclo":
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ThenByDescending(s => s.Nombre).ToList<Producto>();
-                                break;
-                            case "madurez":
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ThenByDescending(s => s.Nombre).ToList<Producto>();
-                                break;
-                            case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenByDescending(s => s.Nombre).ToList<Producto>();
-                                break;
-                            case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenByDescending(s => s.Nombre).ToList<Producto>();
-                                break;
-                            default:
-                                model.Productos = model.Productos.OrderByDescending(s => s.Nombre).ToList<Producto>();
-                                break;
-                        }
-                        break;
-                    case "cicloDesc":
-                        switch (select_agroup)
-                        {
-                            case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenByDescending(s => s.Ciclo).ToList<Producto>();
-                                break;
-                            case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenByDescending(s => s.Ciclo).ToList<Producto>();
-                                break;
-                            case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenByDescending(s => s.Ciclo).ToList<Producto>();
-                                break;
-                            case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenByDescending(s => s.Ciclo).ToList<Producto>();
-                                break;
-                            default:
-                                model.Productos = model.Productos.OrderByDescending(s => s.Ciclo).ToList<Producto>();
-                                break;
-                        }
-                        break;
-                    case "madurezDesc":
-                        switch (select_agroup)
-                        {
-                            case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenByDescending(s => s.DiasMadurez).ToList<Producto>();
-                                break;
-                            case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenByDescending(s => s.DiasMadurez).ToList<Producto>();
-                                break;
-                            case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenByDescending(s => s.DiasMadurez).ToList<Producto>();
-                                break;
-                            case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenByDescending(s => s.DiasMadurez).ToList<Producto>();
-                                break;
-                            default:
-                                model.Productos = model.Productos.OrderByDescending(s => s.DiasMadurez).ToList<Producto>();
-                                break;
-                        }
-                        break;
-                    case "alturaDesc":
-                        switch (select_agroup)
-                        {
-                            case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenByDescending(s => s.AlturaPlanta).ToList<Producto>();
-                                break;
-                            case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenByDescending(s => s.AlturaPlanta).ToList<Producto>();
-                                break;
-                            case "ciclo":
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ThenByDescending(s => s.AlturaPlanta).ToList<Producto>();
-                                break;
-                            case "madurez":
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ThenByDescending(s => s.AlturaPlanta).ToList<Producto>();
-                                break;
-                            case "material":
-                                model.Productos = model.Productos.OrderBy(s => s.Material).ThenByDescending(s => s.AlturaPlanta).ToList<Producto>();
-                                break;
-                            default:
-                                model.Productos = model.Productos.OrderByDescending(s => s.AlturaPlanta).ToList<Producto>();
-                                break;
-                        }
-                        break;
-                    case "materialDesc":
-                        switch (select_agroup)
-                        {
-                            case "empresa":
-                                model.Productos = model.Productos.OrderBy(s => s.Empresa).ThenByDescending(s => s.Material).ToList<Producto>();
-                                break;
-                            case "nombre":
-                                model.Productos = model.Productos.OrderBy(s => s.Nombre).ThenByDescending(s => s.Material).ToList<Producto>();
-                                break;
-                            case "ciclo":
-                                model.Productos = model.Productos.OrderBy(s => s.Ciclo).ThenByDescending(s => s.Material).ToList<Producto>();
-                                break;
-                            case "madurez":
-                                model.Productos = model.Productos.OrderBy(s => s.DiasMadurez).ThenByDescending(s => s.Material).ToList<Producto>();
-                                break;
-                            case "altura":
-                                model.Productos = model.Productos.OrderBy(s => s.AlturaPlanta).ThenByDescending(s => s.Material).ToList<Producto>();
-                                break;
-                            default:
-                                model.Productos = model.Productos.OrderByDescending(s => s.Material).ToList<Producto>();
-                                break;
-                        }
-                        break;
-                        
-                }
-
-                oldSort = newSort;
-                
-            }
-
-            if (newSort == "" && oldSort == "" && select_agroup == "" && model.Productos != null)
-            {
-                model.Productos = model.Productos.OrderBy(s => s.Nombre).ToList<Producto>();
-                oldSort = "empresaAsc";
-            }
-            //////////////////////////////////////////////////////////////
-            */
             ///////////// Guardar Parametros /////////////////////
-            ViewBag.Filtros = AtributoService.Filter_Get(model.CategoriaIdProductos,1);
-            ViewBag.Empresas = EmpresaService.Get(0, model.CategoriaIdProductos);
-            ViewBag.Regiones = LugarService.GetRegiones(model.CategoriaIdProductos);
+            ViewBag.Filtros = _attributeRepository.GetFilters(model.CategoriaIdProductos).Distinct();
+            ViewBag.Empresas = _companyRepository.Get(c => !c.IsDisabled && c.Products.Select(p => p.CategoryId).Contains(model.CategoriaIdProductos)).Distinct();
+
+            var places = new List<int>();
+            model.Products.ForEach(p => places.AddRange(p.Places.Select(pl => pl.Id)));
+
+            ViewBag.Regiones = _placeRepository.Get(p => !string.IsNullOrEmpty(p.Region) 
+                                                        && places.Contains(p.Id));
+
+            
+
             ViewBag.OldSort = oldSort;
             ViewBag.SelectAgroup = select_agroup;
 
@@ -802,10 +543,6 @@ namespace AgroEnsayos.Controllers
             return View(model);
         }
 
-        public ActionResult Index(int id)
-        {
-            return View();
-        }
 
        
         [Authorize()]
@@ -814,13 +551,13 @@ namespace AgroEnsayos.Controllers
             model.BuscarProductos = BuscarProductos;
             model.CategoriaIdProductos = CategoriaIdProductos;
 
-            model.Productos = ProductoService.Lookup(model.CategoriaIdProductos, model.BuscarProductos);
-            if (model.Productos != null && model.Productos.Count > 0)
+            model.Products = _productRepository.Lookup(model.CategoriaIdProductos, model.BuscarProductos);
+            if (model.Products != null && model.Products.Count > 0)
             {
-                model.Categoria = model.Productos.First().Categoria;
+                model.Category = model.Products.First().Category.Name;
             }
             else
-            { model.Categoria = "Trigo"; }
+            { model.Category = "Trigo"; }
             ///////////// Obtener Productos x Filtros /////////////
 
             ViewBag.EsEnsayo = EsEnsayo;
@@ -833,34 +570,34 @@ namespace AgroEnsayos.Controllers
             model.BuscarProductos = BuscarProductos;
             model.CategoriaIdProductos = CategoriaIdProductos;
 
-            List<Producto> producto = new List<Producto>();
-            List<Atributo> atributos = new List<Atributo>();
-            List<Empresa> empresa = new List<Empresa>();
+            List<Product> producto = new List<Product>();
+            List<Domain.Entities.Attribute> atributos = new List<Domain.Entities.Attribute>();
+            List<Company> empresa = new List<Company>();
             
             if (id != 0)
             {
-                producto = ProductoService.Get(0,true,id);
+                producto = _productRepository.Get(p => p.Id == id);
             }
 
             if (producto.Count > 0)
             {
-                empresa = EmpresaService.Get(producto[0].EmpresaId);
+                empresa = _companyRepository.Get(c => c.Id == producto[0].CompanyId);
                 if (empresa.Count > 0)
                 {
                     ViewBag.Empresa = empresa[0];
                 }
-                atributos = AtributoService.ProductoAtributo_Get(producto[0].Id);
+                atributos = producto[0].AttributeMappings.Select(m => m.Attribute).ToList();
                 ViewBag.Producto = producto[0];
                 ViewBag.Atributo = atributos;
             }
 
-            model.Productos = ProductoService.Lookup(model.CategoriaIdProductos, model.BuscarProductos);
-            if (model.Productos != null && model.Productos.Count > 0)
+            model.Products = _productRepository.Lookup(model.CategoriaIdProductos, model.BuscarProductos);
+            if (model.Products != null && model.Products.Count > 0)
             {
-                model.Categoria = model.Productos.First().Categoria;
+                model.Category = model.Products.First().Category.Name;
             }
             else
-            { model.Categoria = "Trigo"; }
+            { model.Category = "Trigo"; }
             ///////////// Obtener Productos x Filtros /////////////
 
             ViewBag.EsEnsayo = EsEnsayo;
@@ -873,71 +610,71 @@ namespace AgroEnsayos.Controllers
             model.BuscarProductos = BuscarProductos;
             model.CategoriaIdProductos = CategoriaIdProductos;
 
-            List<Producto> producto1 = new List<Producto>();
-            List<Producto> producto2 = new List<Producto>();
-            List<Producto> producto3 = new List<Producto>();
-            List<Producto> producto4 = new List<Producto>();
-            List<Producto> producto5 = new List<Producto>();
+            List<Product> producto1 = new List<Product>();
+            List<Product> producto2 = new List<Product>();
+            List<Product> producto3 = new List<Product>();
+            List<Product> producto4 = new List<Product>();
+            List<Product> producto5 = new List<Product>();
             
-            List<Atributo> atributos1 = new List<Atributo>();
-            List<Atributo> atributos2 = new List<Atributo>();
-            List<Atributo> atributos3 = new List<Atributo>();
-            List<Atributo> atributos4 = new List<Atributo>();
-            List<Atributo> atributos5 = new List<Atributo>();
+            List<Domain.Entities.Attribute> atributos1 = new List<Domain.Entities.Attribute>();
+            List<Domain.Entities.Attribute> atributos2 = new List<Domain.Entities.Attribute>();
+            List<Domain.Entities.Attribute> atributos3 = new List<Domain.Entities.Attribute>();
+            List<Domain.Entities.Attribute> atributos4 = new List<Domain.Entities.Attribute>();
+            List<Domain.Entities.Attribute> atributos5 = new List<Domain.Entities.Attribute>();
 
-            List<Atributo> atr_comp = new List<Atributo>();
+            List<Domain.Entities.Attribute> atr_comp = new List<Domain.Entities.Attribute>();
 
-            atr_comp = AtributoService.Get(CategoriaIdProductos);
+            atr_comp = _categoryRepository.Single(c => c.Id == CategoriaIdProductos, inc => inc.Attributes).Attributes.ToList();
             ViewBag.AtrComp = atr_comp;
             
             if (id1 != 0)
             {
-                producto1 = ProductoService.Get(0, true, id1);
+                producto1 = _productRepository.Get(p => p.Id == id1, inc => inc.AttributeMappings);
                 if (producto1.Count > 0)
-                    atributos1 = AtributoService.ProductoAtributo_Get(producto1[0].Id);
+                    atributos1 = producto1[0].AttributeMappings.Select(x => x.Attribute).ToList();
                 ViewBag.Producto1 = producto1[0];
                 ViewBag.Atributo1 = atributos1;
             }
             if (id2 != 0)
             {
-                producto2 = ProductoService.Get(0, true, id2);
+                producto2 = _productRepository.Get(p => p.Id == id2, inc => inc.AttributeMappings);
                 if (producto2.Count > 0)
-                    atributos2 = AtributoService.ProductoAtributo_Get(producto2[0].Id);
+                    atributos2 = producto2[0].AttributeMappings.Select(x => x.Attribute).ToList();
                 ViewBag.Producto2 = producto2[0];
                 ViewBag.Atributo2 = atributos2;
             } 
             if (id3 != 0)
             {
-                producto3 = ProductoService.Get(0, true, id3);
+                producto3 = _productRepository.Get(p => p.Id == id3, inc => inc.AttributeMappings);
                 if (producto3.Count > 0)
-                    atributos3 = AtributoService.ProductoAtributo_Get(producto3[0].Id);
+                    atributos3 = producto3[0].AttributeMappings.Select(x => x.Attribute).ToList();
                 ViewBag.Producto3 = producto3[0];
                 ViewBag.Atributo3 = atributos3;
             }
             if (id4 != 0)
             {
-                producto4 = ProductoService.Get(0, true, id4);
+                producto4 = _productRepository.Get(p => p.Id == id4, inc => inc.AttributeMappings);
                 if (producto4.Count > 0)
-                    atributos4 = AtributoService.ProductoAtributo_Get(producto4[0].Id);
+                    atributos4 = producto4[0].AttributeMappings.Select(x => x.Attribute).ToList();
                 ViewBag.Producto4 = producto4[0];
                 ViewBag.Atributo4 = atributos4;
             }
             if (id5 != 0)
             {
-                producto5 = ProductoService.Get(0, true, id5);
+                producto5 = _productRepository.Get(p => p.Id == id5, inc => inc.AttributeMappings);
                 if (producto5.Count > 0)
-                    atributos5 = AtributoService.ProductoAtributo_Get(producto5[0].Id);
+                    atributos5 = producto5[0].AttributeMappings.Select(x => x.Attribute).ToList();
                 ViewBag.Producto5 = producto5[0];
                 ViewBag.Atributo5 = atributos5;
             }
 
-            model.Productos = ProductoService.Lookup(model.CategoriaIdProductos, model.BuscarProductos);
-            if (model.Productos != null && model.Productos.Count > 0)
+            model.Products = _productRepository.Lookup(model.CategoriaIdProductos, model.BuscarProductos);
+            if (model.Products != null && model.Products.Count > 0)
             {
-                model.Categoria = model.Productos.First().Categoria;
+                model.Category = model.Products.First().Category.Name;
             }
             else
-            { model.Categoria = "Trigo"; }
+            { model.Category = "Trigo"; }
             ///////////// Obtener Productos x Filtros /////////////
 
             ViewBag.id1 = id1;

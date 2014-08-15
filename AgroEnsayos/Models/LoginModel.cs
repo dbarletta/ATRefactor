@@ -6,7 +6,7 @@ using System.Web;
 
 namespace AgroEnsayos.Models
 {
-    public class LoginModel : AgroEnsayos.Entities.User
+    public class LoginModel : Domain.Entities.User
     {
         [Required]
         [Display(Name = "Usuario")]

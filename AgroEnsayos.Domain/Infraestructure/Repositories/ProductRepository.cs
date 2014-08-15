@@ -13,6 +13,8 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
     public interface IProductRepository : IRepository<Product> 
     {
         void SaveGraph(Product product);
+
+        List<Product> Lookup(int categoriaId, string searchTerm, string empresa = "", string antiguedad = "", string region = "", List<string> cond_atributo = null, int limit_ini = 0, int limit_fin = 0);
     }
 
     public class ProductRepository : RepositoryBase<Product>, IProductRepository
@@ -33,6 +35,11 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
                        .OwnedCollection(x => x.Places));
                 ctx.SaveChanges();
             }
+        }
+
+        public List<Product> Lookup(int categoriaId, string searchTerm, string empresa = "", string antiguedad = "", string region = "", List<string> cond_atributo = null, int limit_ini = 0, int limit_fin = 0)
+        {
+            throw new NotImplementedException();
         }
     }
 }

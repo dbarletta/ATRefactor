@@ -1,9 +1,9 @@
-﻿using AgroEnsayos.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
+using AgroEnsayos.Domain.Entities;
 
 namespace AgroEnsayos.Models
 {
@@ -21,11 +21,11 @@ namespace AgroEnsayos.Models
         [Display(Name = "CategoriaId")]
         public int CategoriaIdEnsayos { get; set; }
 
-        public List<Producto> Productos { get; set; }
+        public List<Product> Products { get; set; }
 
-        public List<Ensayo> Ensayos { get; set; }
+        public List<Test> Tests { get; set; }
 
-        public string Categoria { get; set; }
+        public string Category { get; set; }
 
         public Dictionary<string, List<string>> dicFilter{get ; set;}
     

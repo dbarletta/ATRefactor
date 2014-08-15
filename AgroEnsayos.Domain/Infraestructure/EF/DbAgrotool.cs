@@ -77,6 +77,12 @@ namespace AgroEnsayos.Domain.Infraestructure.EF
                 .WithRequired(e => e.Product)
                 .WillCascadeOnDelete(false);
 
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.CategoriesOfIntrest)
+                .WithMany(c => c.Users)
+                .Map(m => m.MapLeftKey("UserId").MapRightKey("CategoryId").ToTable("UserCategory"));
+
         }
     }
 }
