@@ -587,16 +587,18 @@ namespace AgroEnsayos.Controllers
 
             if (ProductoId != 0)
             {
-                model.Tests = _testRepository.Get(t => t.Product.CategoryId == model.CategoriaIdEnsayos && t.ProductId == ProductoId);
+                model.Tests = _testRepository.Get(t => t.Product.CategoryId == model.CategoriaIdEnsayos && t.ProductId == ProductoId,
+                                                    inc => inc.Product);
             }
             else 
             {
                 model.Tests = _testRepository.Lookup(model.CategoriaIdEnsayos, model.BuscarEnsayos, cond_empresa, cond_fuente, cond_provincia, cond_localidad, cond_campana, list_atributo);
             }
             
+
             if (model.Tests != null && model.Tests.Count > 0)
             {
-                model.Category = model.Tests.First().Product.Category.Name;
+                model.Category = _categoryRepository.Single(c => c.Id == model.CategoriaIdEnsayos).Name;
             }
             else
             { model.Category = "Trigo"; }

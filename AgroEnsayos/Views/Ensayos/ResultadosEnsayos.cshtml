@@ -1,14 +1,14 @@
 ﻿@model AgroEnsayos.Models.SearchModel
-@using AgroEnsayos.Entities;
+@using AgroEnsayos.Domain.Entities;
 @using AgroEnsayos.Helpers;
 @{
-    List<Atributo> filtros = ViewBag.Filtros as List<Atributo>;
+    List<AgroEnsayos.Domain.Entities.Attribute> filtros = ViewBag.Filtros as List<AgroEnsayos.Domain.Entities.Attribute>;
     List<String> localidad = ViewBag.Localidades as List<String>;
     List<String> provincia = ViewBag.Provincias as List<String>;
-    List<Campana> campana = ViewBag.Campanas as List<Campana>;
+    List<Campaign> campana = ViewBag.Campanas as List<Campaign>;
     List<String> fuente = ViewBag.Fuentes as List<String>;
 
-    List<Empresa> empresas = ViewBag.Empresas as List<Empresa>;
+    List<Company> empresas = ViewBag.Empresas as List<Company>;
 
     string oldSort = ViewBag.OldSort as string;
     string selectAgroup = ViewBag.SelectAgroup as string;
@@ -20,7 +20,7 @@
     string auxRubro = "";
     string auxNombre = "";
     string auxRubro_ultimo = "";
-    List<Atributo> auxFiltro = new List<Atributo>();
+    List<AgroEnsayos.Domain.Entities.Attribute> auxFiltro = new List<AgroEnsayos.Domain.Entities.Attribute>();
 
     Dictionary<string, List<string>> dicStr = new Dictionary<string, List<string>>();
     Dictionary<string, List<string>> dicStrFil = new Dictionary<string, List<string>>();
@@ -88,10 +88,10 @@
         <div class="container header header3" style="height: 40px;">
             <div class="breadcrumb" style="float: left">
                 @Html.ActionLink("Cultivos", "Index", "Home")
-                @if (Model.Categoria != null)
+                @if (Model.Category != null)
                 {
                     <span>&nbsp;>&nbsp;</span>
-                    @Html.ActionLink(Model.Categoria, "Busqueda/" + Model.CategoriaIdEnsayos, "Home")
+                    @Html.ActionLink(Model.Category, "Busqueda/" + Model.CategoriaIdEnsayos, "Home")
                 }
             </div>
             <div class="styled-select" style="float: right; margin-top: 2px;">
@@ -204,9 +204,9 @@
                                         @if (empresas != null)
                                         {
                                             i_atr=0;
-                                            foreach (Empresa e in empresas)
+                                            foreach (Company e in empresas)
                                             {
-                                                <a style="width:180px" id="fil_empresa_@i_atr" name="fil_empresa_@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_empresa_','Empresa','@i_atr','@e.Id');">@e.Nombre</a>
+                                                <a style="width:180px" id="fil_empresa_@i_atr" name="fil_empresa_@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_empresa_','Empresa','@i_atr','@e.Id');">@e.Name</a>
                                                 i_atr++;
                                             }
                                         }
@@ -260,9 +260,9 @@
                                         @if (campana != null)
                                         {
                                             i_atr=0;
-                                            foreach (Campana l in campana)
+                                            foreach (Campaign l in campana)
                                             {
-                                                <a style="width:180px" id="fil_campana_@i_atr" name="fil_campana_@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_campana_','Campana','@i_atr','@l.CategoriaId');">@l.Nombre</a>
+                                                <a style="width:180px" id="fil_campana_@i_atr" name="fil_campana_@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_campana_','Campana','@i_atr','@l.CategoryId');">@l.Name</a>
                                                 i_atr++;
                                             }
                                         }
@@ -274,19 +274,19 @@
                 </div>
 
 
-                @foreach (Atributo oArt in filtros)
+                @foreach (AgroEnsayos.Domain.Entities.Attribute oArt in filtros)
                 {
                     if (auxRubro == "")
                     {
-                        auxRubro = oArt.Rubro;
+                        auxRubro = oArt.Family;
                     }
 
-                    if (oArt.Rubro == auxRubro)
+                    if (oArt.Family == auxRubro)
                     {
-                        auxRubro_ultimo = oArt.Rubro;
-                        if (oArt.Nombre != auxNombre)
+                        auxRubro_ultimo = oArt.Family;
+                        if (oArt.Name != auxNombre)
                         {
-                            auxNombre = oArt.Nombre;
+                            auxNombre = oArt.Name;
 
                             dicStr.Add(auxNombre, new List<string>());
 
@@ -303,17 +303,17 @@
                             <dt onclick="MostrarDt(this);">@auxRubro</dt>
                             <dd>
                                 <ol>
-                                    @foreach (Atributo Atr in auxFiltro)
+                                    @foreach (AgroEnsayos.Domain.Entities.Attribute Atr in auxFiltro)
                                     {
                                         i_atr = 0;
                                         <li>
-                                            <a href="javaScript:void(0);" onclick="OpenValues('val_@Atr.Id');">@Atr.Nombre</a>
+                                            <a href="javaScript:void(0);" onclick="OpenValues('val_@Atr.Id');">@Atr.Name</a>
                                             <div id="val_@Atr.Id" style="display:none;padding: 20px 0 0 10px;">
-                                                @foreach (string str in dicStr[Atr.Nombre])
+                                                @foreach (string str in dicStr[Atr.Name])
                                                 {
                                                     if (str.ToString() != "")
                                                     {
-                                                        <a style="width:180px" id="fil_@Atr.Id@i_atr" name="fil_@Atr.Id@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_@Atr.Id','@Atr.Nombre','@i_atr','@Atr.Id');">@str.ToString()</a>
+                                                        <a style="width:180px" id="fil_@Atr.Id@i_atr" name="fil_@Atr.Id@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_@Atr.Id','@Atr.Name','@i_atr','@Atr.Id');">@str.ToString()</a>
                                                     }
                                                     i_atr++;
                                                 }
@@ -326,7 +326,7 @@
                     </div>
                                     auxFiltro.Clear();
                                     dicStr.Clear();
-                                    auxRubro = oArt.Rubro;
+                                    auxRubro = oArt.Family;
                     }
                 }
                 @if (auxFiltro.Count > 0)
@@ -336,13 +336,13 @@
                             <dt onclick="MostrarDt(this);">@auxRubro_ultimo</dt>
                             <dd>
                                 <ol>
-                                    @foreach (Atributo Atr1 in auxFiltro)
+                                    @foreach (AgroEnsayos.Domain.Entities.Attribute Atr1 in auxFiltro)
                                     {
                                         i_atr = 0;
                                         <li>
-                                            <a href="javaScript:void(0);" onclick="OpenValues('val_@Atr1.Id');">@Atr1.Nombre</a>
+                                            <a href="javaScript:void(0);" onclick="OpenValues('val_@Atr1.Id');">@Atr1.Name</a>
                                             <div id="val_@Atr1.Id"  style="display:none;padding: 20px 0 0 10px;">
-                                                @foreach (string str in dicStr[Atr1.Nombre])
+                                                @foreach (string str in dicStr[Atr1.Name])
                                                 {
                                                     if (str.ToString() != "")
                                                     {
@@ -363,7 +363,7 @@
             </div>
             <div id="div_product" name="div_product" style="float: left; background-color: #ffffff; width: 700px; padding-left: 10px;">
                 <div class="title_label">
-                    <span>Ensayos</span><span style="font-size:11px">&nbsp;(@Model.Ensayos.Count Encontrados)</span>
+                    <span>Ensayos</span><span style="font-size:11px">&nbsp;(@Model.Tests.Count Encontrados)</span>
                 </div>
                 <div style="float: right">
                     <input type="button" value="    TESTIMONIOS" class="buttonGreen testimonios" onclick="SendTestimonios()" style="height: 32px">

@@ -1,8 +1,7 @@
-﻿@using AgroEnsayos.Entities;
+﻿@using AgroEnsayos.Domain.Entities;
 @{
     ViewBag.Title = "Seleccione cultivo";
-    List<Categoria> items = ViewBag.Categorias as List<Categoria>;
-
+    List<Category> items = ViewBag.Categorias as List<Category>;
     List<int> userCategorias = ViewBag.UserCategorias as List<int>;
     
     ViewBag.CategoriaId = 0;
@@ -25,13 +24,13 @@
                 @{
                     if (items != null)
                     {
-                        foreach (Categoria item1 in items.Where(x => x.Padre == "Semillas"))
+                        foreach (Category item1 in items.Where(x => x.Parent.Name == "Semillas"))
                         {
                             int i = userCategorias.Find(item => item == item1.Id);
                             if (i != 0)
                             {
                     <div class="container row" onclick="window.location.href='/Home/Busqueda/@item1.Id';">
-                        <div class="rowcontent">@item1.Nombre.ToUpper()</div>
+                        <div class="rowcontent">@item1.Name.ToUpper()</div>
                     </div>
                             }
                         }
@@ -48,13 +47,13 @@
                 @{
                     if (items != null)
                     {
-                        foreach (Categoria item1 in items.Where(x => x.Padre == "Fitosanitarios"))
+                        foreach (Category item1 in items.Where(x => x.Parent.Name == "Fitosanitarios"))
                         {
                             int i = userCategorias.Find(item => item == item1.Id);
                             if(i!=0)
                             {
                     <div class="container row" onclick="window.location.href='/Home/Busqueda/@item1.Id';">
-                        <div class="rowcontent">@item1.Nombre.ToUpper()</div>
+                        <div class="rowcontent">@item1.Name.ToUpper()</div>
                     </div>
                             }
                         }

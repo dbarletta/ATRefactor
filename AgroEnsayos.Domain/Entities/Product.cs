@@ -69,10 +69,10 @@ namespace AgroEnsayos.Domain.Entities
         public void Disable()
         {
             this.IsDisabled = true;
-            foreach(var map in AttributeMappings)
-            {
-                map.OriginalValue = null;
-            }
+            //foreach(var map in AttributeMappings)
+            //{
+            //    map.OriginalValue = null;
+            //}
         }
     }
 }

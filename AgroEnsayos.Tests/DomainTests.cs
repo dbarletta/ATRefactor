@@ -114,5 +114,15 @@ namespace AgroEnsayos.Tests
             }
         }
 
+        [TestMethod]
+        public void RepoTest()
+        {
+            var _userRepository = new UserRepository(new EFDataContextFactory());
+
+            var user = _userRepository.Single(u => u.Name == "admin", inc => inc.CategoriesOfIntrest)
+                                      .CategoriesOfIntrest
+                                      .Select(c => c.Id);
+        }
+
     }
 }
