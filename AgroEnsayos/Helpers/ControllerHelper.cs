@@ -10,7 +10,16 @@ namespace AgroEnsayos.Helpers
     {
         public static string ToJson(this object _object)
         {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(_object);
+            var settings = new JsonSerializerSettings()
+            {
+                PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                MaxDepth = 2
+            };
+
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(_object, settings);
+
+            return json;
         }
 
         public static T FromJSon<T>(this string _object)

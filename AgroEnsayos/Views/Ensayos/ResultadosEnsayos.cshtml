@@ -2,11 +2,11 @@
 @using AgroEnsayos.Domain.Entities;
 @using AgroEnsayos.Helpers;
 @{
-    List<AgroEnsayos.Domain.Entities.Attribute> filtros = ViewBag.Filtros as List<AgroEnsayos.Domain.Entities.Attribute>;
-    List<String> localidad = ViewBag.Localidades as List<String>;
-    List<String> provincia = ViewBag.Provincias as List<String>;
-    List<Campaign> campana = ViewBag.Campanas as List<Campaign>;
-    List<String> fuente = ViewBag.Fuentes as List<String>;
+    IList<AgroEnsayos.Domain.Entities.Attribute> filtros = ViewBag.Filtros as IList<AgroEnsayos.Domain.Entities.Attribute>;
+    IList<String> localidad = ViewBag.Localidades as IList<String>;
+    IList<String> provincia = ViewBag.Provincias as IList<String>;
+    IList<Campaign> campana = ViewBag.Campanas as IList<Campaign>;
+    IList<String> fuente = ViewBag.Fuentes as IList<String>;
 
     List<Company> empresas = ViewBag.Empresas as List<Company>;
 
@@ -22,8 +22,8 @@
     string auxRubro_ultimo = "";
     List<AgroEnsayos.Domain.Entities.Attribute> auxFiltro = new List<AgroEnsayos.Domain.Entities.Attribute>();
 
-    Dictionary<string, List<string>> dicStr = new Dictionary<string, List<string>>();
-    Dictionary<string, List<string>> dicStrFil = new Dictionary<string, List<string>>();
+    Dictionary<string, IList<string>> dicStr = new Dictionary<string, IList<string>>();
+    Dictionary<string, IList<string>> dicStrFil = new Dictionary<string, IList<string>>();
 
     string strNombre = "";
     string strNombre_aux = "";
@@ -108,6 +108,7 @@
                 </select>
             </div>
         </div>
+        
         <div class="container header3" style="background-color: #f7f7f7">
             <div id="div_filter" style="float: left; width: 240px; background-color: #f7f7f7;">
                 <input type="hidden" id="remove_id_filter" name="remove_id_filter" value="">
@@ -158,7 +159,7 @@
                             <div class="div_filter">
                                 <input value="&nbsp;" class="input_fil" id="del_@i_fil.ToString()" name="del_@i_fil.ToString()" type="button" title="Borrar Filtro" onclick="removeFilter(@i_fil)"  />
                                 <span>@strValor1.ToString()</span>
-                                <input type="hidden" id="list_filters" name="list_filters" value="@strFilterFor.ToString()">
+                                <input type="hidden" id="list_filters" name="list_filters" class="listFilter" value="@strFilterFor.ToString()">
                             </div>
                             i_fil++;
                         }
@@ -184,7 +185,7 @@
                             <div class="div_filter">
                                 <input value="&nbsp;" class="input_fil" id="del_@i_fil.ToString()" name="del_@i_fil.ToString()" type="button" title="Borrar Filtro" onclick="removeFilter(@i_fil)"  />
                                 <span>@strValor.ToString()</span>
-                                <input type="hidden" id="list_filters" name="list_filters" value="@strFilterFor.ToString()">
+                                <input type="hidden" id="list_filters" name="list_filters" class="listFilter" value="@strFilterFor.ToString()">
                             </div>
                             i_fil++;
                         }
@@ -293,7 +294,7 @@
 
                             auxFiltro.Add(oArt);
                         }
-                        dicStr[auxNombre].Add(oArt.equivalencia_valor);
+                        dicStr[auxNombre].Add(oArt.AttributeMappings.First().MappedValue);
 
                     }
                     else
@@ -346,7 +347,7 @@
                                                 {
                                                     if (str.ToString() != "")
                                                     {
-                                                        <a style="width:180px" id="fil_@Atr1.Id@i_atr" name="fil_@Atr1.Id@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_@Atr1.Id','@Atr1.Nombre','@i_atr','@Atr1.Id');">@str.ToString()</a>
+                                                        <a style="width:180px" id="fil_@Atr1.Id@i_atr" name="fil_@Atr1.Id@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_@Atr1.Id','@Atr1.Name','@i_atr','@Atr1.Id');">@str.ToString()</a>
                                                     }
                                                     i_atr++;
                                                 }
@@ -363,7 +364,7 @@
             </div>
             <div id="div_product" name="div_product" style="float: left; background-color: #ffffff; width: 700px; padding-left: 10px;">
                 <div class="title_label">
-                    <span>Ensayos</span><span style="font-size:11px">&nbsp;(@Model.Tests.Count Encontrados)</span>
+                    <span>Ensayos</span><span style="font-size:11px">&nbsp;(@Model.TestsCount Encontrados)</span>
                 </div>
                 <div style="float: right">
                     <input type="button" value="    TESTIMONIOS" class="buttonGreen testimonios" onclick="SendTestimonios()" style="height: 32px">
@@ -411,7 +412,7 @@
                             <a href="#" onclick="sendSubmit('rindeDesc');" title="Ordenar Descendente" class="order_icon">&#x25BC;</a>
                         </div>
                                 </th>
-                                <th style="width: 65px;"><span title="Posición dentro del Ensayo">Rank.</span></th>
+                                @*<th style="width: 65px;"><span title="Posición dentro del Ensayo">Rank.</span></th>*@
                             </tr>
                         </thead>
                         <tbody id="ensayoList" name="ensayoList">

@@ -5,6 +5,8 @@ namespace AgroEnsayos.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.Entity.Spatial;
+    using System.Web.Script.Serialization;
+    
 
     public partial class Campaign
     {

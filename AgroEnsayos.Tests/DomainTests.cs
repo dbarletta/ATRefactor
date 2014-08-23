@@ -9,6 +9,10 @@ using System.Data;
 using System.Collections.Generic;
 using AgroEnsayos.Domain.Entities;
 using System.Data.SqlClient;
+using Newtonsoft.Json;
+using AutoMapper;
+using AgroEnsayos.Domain.Entities.Dto;
+
 
 namespace AgroEnsayos.Tests
 {
@@ -16,6 +20,13 @@ namespace AgroEnsayos.Tests
     public class DomainTests
     {
         private IDataContextFactory factory = new EFDataContextFactory();
+
+        [TestInitialize]
+        public void Initialize()
+        {
+
+        }
+
 
         [TestMethod]
         public void ProductsTest()
@@ -117,11 +128,26 @@ namespace AgroEnsayos.Tests
         [TestMethod]
         public void RepoTest()
         {
-            var _userRepository = new UserRepository(new EFDataContextFactory());
+            var _testRepository = new TestRepository(new EFDataContextFactory());
+        }
 
-            var user = _userRepository.Single(u => u.Name == "admin", inc => inc.CategoriesOfIntrest)
-                                      .CategoriesOfIntrest
-                                      .Select(c => c.Id);
+        [TestMethod]
+        public void ContextTests()
+        {
+            using (var ctx = new DbAgrotool())
+            {
+                var query = ctx.Tests
+                               .Include(t => t.Campaign)
+                               .Include(t => t.Product)
+                               .Include(t => t.Place)
+                               .Take(5);
+                
+                var result = query.ToList();
+
+                Mapper.CreateMap<Test, TestDto>();
+
+                var testDto = Mapper.Map<List<TestDto>>(result);
+            }
         }
 
     }

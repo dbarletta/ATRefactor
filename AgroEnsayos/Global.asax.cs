@@ -6,6 +6,11 @@ using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using AgroEnsayos.Controllers;
+using AgroEnsayos.Domain.Entities;
+using AgroEnsayos.Domain.Entities.Dto;
+using AutoMapper;
+using Newtonsoft.Json;
 
 namespace AgroEnsayos
 {
@@ -20,6 +25,11 @@ namespace AgroEnsayos
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+
+
+            Mapper.CreateMap<Test, TestDto>();
+            Mapper.CreateMap<TestsSearchParams, TestSearchParamsDto>();
+
         }
     }
 }

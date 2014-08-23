@@ -8,6 +8,9 @@ using AgroEnsayos.Helpers;
 using AgroEnsayos.Domain.Infraestructure.Repositories;
 using AgroEnsayos.Domain.Infraestructure.EF;
 using AgroEnsayos.Domain.Entities;
+using AutoMapper;
+using System.Linq.Expressions;
+using AgroEnsayos.Domain.Entities.Dto;
 
 namespace AgroEnsayos.Controllers
 {
@@ -18,6 +21,8 @@ namespace AgroEnsayos.Controllers
         private IAttributeRepository _attributeRepository = null;
         private ICompanyRepository _companyRepository = null;
         private ICampaignRepository _campaignRepository = null;
+        private IPlaceRepository _placeRepository = null;
+        private IProductRepository _productRepository = null;
 
         public EnsayosController()
         {
@@ -27,6 +32,8 @@ namespace AgroEnsayos.Controllers
             _attributeRepository = new AttributeRepository(ctxFactory);
             _companyRepository = new CompanyRepository(ctxFactory);
             _campaignRepository = new CampaignRepository(ctxFactory);
+            _placeRepository = new PlaceRepository(ctxFactory);
+            _productRepository = new ProductRepository(ctxFactory);
         }
 
         [Authorize()]
@@ -37,435 +44,18 @@ namespace AgroEnsayos.Controllers
         }
 
         [Authorize()]
-        public ActionResult GetPageEnsayos(int lastRowId, bool isHistoryBack, List<string> list_filters = null, string newSort = "", string oldSort = "", string select_agroup = "", int CategoriaIdEnsayos = 0, string BuscarEnsayos = "", int ProductoId = 0, string FiltroFuente = "", string FiltroCampana = "", string FiltroCampanaId = "", string FiltroLocalidad = "")
+        public JsonResult GetPageEnsayos(int lastRowId, bool isHistoryBack, List<string> list_filters = null, string newSort = "", string oldSort = "", string select_agroup = "", int CategoriaIdEnsayos = 0, string BuscarEnsayos = "", int ProductoId = 0, string FiltroFuente = "", string FiltroCampana = "", string FiltroCampanaId = "", string FiltroLocalidad = "")
         {
-            SearchModel model = new SearchModel();
+            var skip = lastRowId;
+            var take = 30;
 
-            model.BuscarEnsayos = BuscarEnsayos;
-            model.CategoriaIdEnsayos = CategoriaIdEnsayos;
+            var searchParams = new TestsSearchParams(_attributeRepository, list_filters, CategoriaIdEnsayos, BuscarEnsayos, FiltroFuente, FiltroCampana, FiltroCampanaId, FiltroLocalidad);
+            var searchParamsDto = Mapper.Map<TestSearchParamsDto>(searchParams);
 
-            int limit_ini = lastRowId;
-            int limit_fin = 30;
+            var tests = _testRepository.Lookup(searchParamsDto, skip, take, select_agroup, newSort);
 
-            string cond_empresa = "";
-            string cond_fuente = "";
-            string cond_provincia = "";
-            string cond_localidad = "";
-            string cond_campana = "";
-            List<string> list_atributo = new List<string>();
-
-            string strRubro = "";
-            string strId = "";
-            string strValor = "";
-
-            int tam = 0;
-            int tam_aux = 0;
-
-            //Parsear filtro y sacar datos para armar la condicion
-            if (list_filters != null && list_filters.Count > 0)
-            {
-                foreach (String strFilter in list_filters)
-                {
-                    tam = strFilter.IndexOf("--");
-                    strRubro = strFilter.Substring(0, tam);
-
-                    tam_aux = tam + 2;
-                    tam = strFilter.IndexOf("--", tam_aux);
-                    strId = strFilter.Substring(tam_aux, tam - tam_aux);
-
-                    tam_aux = tam + 2;
-                    strValor = strFilter.Substring(tam_aux);
-
-                    if (strRubro == "Empresa")
-                    {
-                        cond_empresa = cond_empresa + "," + strId;
-                    }
-                    else if (strRubro == "Provincia")
-                    {
-                        cond_provincia = cond_provincia + "," + strId;
-                    }
-                    else if (strRubro == "Localidad")
-                    {
-                        cond_localidad = cond_localidad + "," + strId;
-                    }
-                    else if (strRubro == "Campana")
-                    {
-                        cond_campana = cond_campana + "," + strId;
-                    }
-                    else if (strRubro == "Fuente")
-                    {
-                        cond_fuente = cond_fuente + "," + strId;
-                    }
-                    else
-                    {
-                        list_atributo.Add(strId + "--" + strValor);
-                    }
-                }
-            }
-
-            if (cond_empresa != "")
-                cond_empresa = cond_empresa + ",";
-            if (cond_provincia != "")
-                cond_provincia = cond_provincia + ",";
-            if (cond_fuente != "")
-                cond_fuente = cond_fuente + ",";
-            if (cond_campana != "")
-                cond_campana = cond_campana + ",";
-            if (cond_localidad != "")
-                cond_localidad = cond_localidad + ",";
-
-            ///////////// Obtener Ensayos x Filtros /////////////
-            if (ProductoId != 0)
-            {
-                model.Tests = _testRepository.Get(t => t.Product.CategoryId == model.CategoriaIdEnsayos && t.ProductId == ProductoId);
-            }
-            else
-            {
-                model.Tests = _testRepository.Lookup(model.CategoriaIdEnsayos, model.BuscarEnsayos, cond_empresa, cond_fuente, cond_provincia, cond_localidad, cond_campana, list_atributo);
-            }
-
-            model.Category = "NN";
-            List<Category> ar_c = _categoryRepository.GetAll();
-            foreach (Category c in ar_c)
-            {
-                if (c.Id == model.CategoriaIdEnsayos)
-                {
-                    model.Category = c.Name;
-                }
-            }
-
-            if (select_agroup != "" && newSort == "")
-            {
-                newSort = select_agroup + "Asc";
-            }
-
-            ////////////////////// Ordenar y Agrupar //////////////////////////////
-
-            if (newSort != "" && model.Tests != null)
-            {
-                switch (newSort)
-                {
-                    case "campanaAsc":
-                        switch (select_agroup)
-                        {
-                            case "fuente":
-                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenBy(s => s.Campaign).ToList<Test>();
-                                break;
-                            case "producto":
-                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenBy(s => s.Campaign.Name).ToList<Test>();
-                                break;
-                            case "provincia":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenBy(s => s.Campaign.Name).ToList<Test>();
-                                break;
-                            case "localidad":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenBy(s => s.Campaign.Name).ToList<Test>();
-                                break;
-                            case "rinde":
-                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenBy(s => s.Campaign).ToList<Test>();
-                                break;
-                            default:
-                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ToList<Test>();
-                                break;
-                        }
-                        break;
-                    case "productoAsc":
-                        switch (select_agroup)
-                        {
-                            case "fuente":
-                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenBy(s => s.Product.Name).ToList<Test>();
-                                break;
-                            case "campana":
-                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenBy(s => s.Product.Name).ToList<Test>();
-                                break;
-                            case "provincia":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenBy(s => s.Product.Name).ToList<Test>();
-                                break;
-                            case "localidad":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenBy(s => s.Product.Name).ToList<Test>();
-                                break;
-                            case "rinde":
-                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenBy(s => s.Product.Name).ToList<Test>();
-                                break;
-                            default:
-                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ToList<Test>();
-                                break;
-                        }
-                        break;
-                    case "fuenteAsc":
-                        switch (select_agroup)
-                        {
-                            case "producto":
-                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenBy(s => s.Source).ToList<Test>();
-                                break;
-                            case "campana":
-                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenBy(s => s.Source).ToList<Test>();
-                                break;
-                            case "provincia":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenBy(s => s.Source).ToList<Test>();
-                                break;
-                            case "localidad":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenBy(s => s.Source).ToList<Test>();
-                                break;
-                            case "rinde":
-                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenBy(s => s.Source).ToList<Test>();
-                                break;
-                            default:
-                                model.Tests = model.Tests.OrderBy(s => s.Source).ToList<Test>();
-                                break;
-                        }
-                        break;
-                    case "provinciaAsc":
-                        switch (select_agroup)
-                        {
-                            case "producto":
-                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenBy(s => s.Place.Province).ToList<Test>();
-                                break;
-                            case "campana":
-                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenBy(s => s.Place.Province).ToList<Test>();
-                                break;
-                            case "fuente":
-                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenBy(s => s.Place.Province).ToList<Test>();
-                                break;
-                            case "localidad":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenBy(s => s.Place.Province).ToList<Test>();
-                                break;
-                            case "rinde":
-                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenBy(s => s.Place.Province).ToList<Test>();
-                                break;
-                            default:
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ToList<Test>();
-                                break;
-                        }
-                        break;
-                    case "localidadAsc":
-                        switch (select_agroup)
-                        {
-                            case "producto":
-                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenBy(s => s.Place.Locality).ToList<Test>();
-                                break;
-                            case "campana":
-                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenBy(s => s.Place.Locality).ToList<Test>();
-                                break;
-                            case "fuente":
-                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenBy(s => s.Place.Locality).ToList<Test>();
-                                break;
-                            case "provincia":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenBy(s => s.Place.Locality).ToList<Test>();
-                                break;
-                            case "rinde":
-                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenBy(s => s.Place.Locality).ToList<Test>();
-                                break;
-                            default:
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ToList<Test>();
-                                break;
-                        }
-                        break;
-                    case "rindeAsc":
-                        switch (select_agroup)
-                        {
-                            case "producto":
-                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenBy(s => s.Yield).ToList<Test>();
-                                break;
-                            case "campana":
-                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenBy(s => s.Yield).ToList<Test>();
-                                break;
-                            case "fuente":
-                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenBy(s => s.Yield).ToList<Test>();
-                                break;
-                            case "provincia":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenBy(s => s.Yield).ToList<Test>();
-                                break;
-                            case "localidad":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenBy(s => s.Yield).ToList<Test>();
-                                break;
-                            default:
-                                model.Tests = model.Tests.OrderBy(s => s.Yield).ToList<Test>();
-                                break;
-                        }
-                        break;
-
-                    case "campanaDesc":
-                        switch (select_agroup)
-                        {
-                            case "fuente":
-                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenByDescending(s => s.Campaign).ToList<Test>();
-                                break;
-                            case "producto":
-                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenByDescending(s => s.Campaign).ToList<Test>();
-                                break;
-                            case "provincia":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenByDescending(s => s.Campaign).ToList<Test>();
-                                break;
-                            case "localidad":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenByDescending(s => s.Campaign).ToList<Test>();
-                                break;
-                            case "rinde":
-                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenByDescending(s => s.Campaign).ToList<Test>();
-                                break;
-                            default:
-                                model.Tests = model.Tests.OrderByDescending(s => s.Campaign).ToList<Test>();
-                                break;
-                        }
-                        break;
-                    case "productoDesc":
-                        switch (select_agroup)
-                        {
-                            case "fuente":
-                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenByDescending(s => s.Product.Name).ToList<Test>();
-                                break;
-                            case "campana":
-                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenByDescending(s => s.Product.Name).ToList<Test>();
-                                break;
-                            case "provincia":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenByDescending(s => s.Product.Name).ToList<Test>();
-                                break;
-                            case "localidad":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenByDescending(s => s.Product.Name).ToList<Test>();
-                                break;
-                            case "rinde":
-                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenByDescending(s => s.Product.Name).ToList<Test>();
-                                break;
-                            default:
-                                model.Tests = model.Tests.OrderByDescending(s => s.Product.Name).ToList<Test>();
-                                break;
-                        }
-                        break;
-                    case "fuenteDesc":
-                        switch (select_agroup)
-                        {
-                            case "producto":
-                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenByDescending(s => s.Source).ToList<Test>();
-                                break;
-                            case "campana":
-                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenByDescending(s => s.Source).ToList<Test>();
-                                break;
-                            case "provincia":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenByDescending(s => s.Source).ToList<Test>();
-                                break;
-                            case "localidad":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenByDescending(s => s.Source).ToList<Test>();
-                                break;
-                            case "rinde":
-                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenByDescending(s => s.Source).ToList<Test>();
-                                break;
-                            default:
-                                model.Tests = model.Tests.OrderByDescending(s => s.Source).ToList<Test>();
-                                break;
-                        }
-                        break;
-                    case "provinciaDesc":
-                        switch (select_agroup)
-                        {
-                            case "producto":
-                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenByDescending(s => s.Place.Province).ToList<Test>();
-                                break;
-                            case "campana":
-                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenByDescending(s => s.Place.Province).ToList<Test>();
-                                break;
-                            case "fuente":
-                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenByDescending(s => s.Place.Province).ToList<Test>();
-                                break;
-                            case "localidad":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenByDescending(s => s.Place.Province).ToList<Test>();
-                                break;
-                            case "rinde":
-                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenByDescending(s => s.Place.Province).ToList<Test>();
-                                break;
-                            default:
-                                model.Tests = model.Tests.OrderByDescending(s => s.Place.Province).ToList<Test>();
-                                break;
-                        }
-                        break;
-                    case "localidadDesc":
-                        switch (select_agroup)
-                        {
-                            case "producto":
-                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenByDescending(s => s.Place.Locality).ToList<Test>();
-                                break;
-                            case "campana":
-                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenByDescending(s => s.Place.Locality).ToList<Test>();
-                                break;
-                            case "fuente":
-                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenByDescending(s => s.Place.Locality).ToList<Test>();
-                                break;
-                            case "provincia":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenByDescending(s => s.Place.Locality).ToList<Test>();
-                                break;
-                            case "rinde":
-                                model.Tests = model.Tests.OrderBy(s => s.Yield).ThenByDescending(s => s.Place.Locality).ToList<Test>();
-                                break;
-                            default:
-                                model.Tests = model.Tests.OrderByDescending(s => s.Place.Locality).ToList<Test>();
-                                break;
-                        }
-                        break;
-                    case "rindeDesc":
-                        switch (select_agroup)
-                        {
-                            case "producto":
-                                model.Tests = model.Tests.OrderBy(s => s.Product.Name).ThenByDescending(s => s.Yield).ToList<Test>();
-                                break;
-                            case "campana":
-                                model.Tests = model.Tests.OrderBy(s => s.Campaign).ThenByDescending(s => s.Yield).ToList<Test>();
-                                break;
-                            case "fuente":
-                                model.Tests = model.Tests.OrderBy(s => s.Source).ThenByDescending(s => s.Yield).ToList<Test>();
-                                break;
-                            case "provincia":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Province).ThenByDescending(s => s.Yield).ToList<Test>();
-                                break;
-                            case "localidad":
-                                model.Tests = model.Tests.OrderBy(s => s.Place.Locality).ThenByDescending(s => s.Yield).ToList<Test>();
-                                break;
-                            default:
-                                model.Tests = model.Tests.OrderByDescending(s => s.Yield).ToList<Test>();
-                                break;
-                        }
-                        break;
-
-                }
-
-                oldSort = newSort;
-
-            }
-
-            if (newSort == "" && oldSort == "" && select_agroup == "" && model.Tests != null)
-            {
-                model.Tests = model.Tests.OrderByDescending(s => s.Yield).ToList<Test>();
-                oldSort = "rindeDesc";
-            }
-            //////////////////////////////////////////////////////////////
-
-            ///////////// Guardar Parametros /////////////////////
-            ViewBag.Filtros = _attributeRepository.GetFilters(model.CategoriaIdEnsayos).Distinct();
-            ViewBag.Empresas = _companyRepository.Get(c => !c.IsDisabled && c.Products.Select(p => p.CategoryId).Contains(model.CategoriaIdEnsayos)).Distinct();
-            ViewBag.Provincias = model.Tests.Select(t => t.Place.Province).Distinct();
-            ViewBag.Localidades = model.Tests.Select(t => t.Place.Locality).Distinct();
-            ViewBag.Fuentes = model.Tests.Select(t => t.Source).Distinct();
-            ViewBag.Campanas = _campaignRepository.Get(c => c.CategoryId == model.CategoriaIdEnsayos);
-
-            ViewBag.OldSort = oldSort;
-            ViewBag.SelectAgroup = select_agroup;
-
-            if (list_filters != null)
-            {
-                list_filters.Sort();
-            }
-            ViewBag.list_filters = list_filters;
-
-            //Paginacion
-            if (model.Tests.Count() > limit_fin && model.Tests.Count() > limit_ini)
-            {
-                model.Tests = model.Tests.Skip<Test>(limit_ini).ToList<Test>();
-                model.Tests = model.Tests.Take(limit_fin).ToList<Test>();
-            }
-            else if (model.Tests.Count() <= limit_ini)
-            {
-                model.Tests.Clear();
-            }
-
-            return Json(model.Tests, JsonRequestBehavior.AllowGet);
-
+            var dto = Mapper.Map<List<TestDto>>(tests);
+            return Json(dto);
         }
 
         [Authorize()]
@@ -585,16 +175,16 @@ namespace AgroEnsayos.Controllers
             ///////////// Obtener Productos x Filtros /////////////
 
 
-            if (ProductoId != 0)
-            {
-                model.Tests = _testRepository.Get(t => t.Product.CategoryId == model.CategoriaIdEnsayos && t.ProductId == ProductoId,
-                                                    inc => inc.Product);
-            }
-            else 
-            {
-                model.Tests = _testRepository.Lookup(model.CategoriaIdEnsayos, model.BuscarEnsayos, cond_empresa, cond_fuente, cond_provincia, cond_localidad, cond_campana, list_atributo);
-            }
-            
+            //if (ProductoId != 0)
+            //{
+            //    model.Tests = _testRepository.Get(t => t.Product.CategoryId == model.CategoriaIdEnsayos && t.ProductId == ProductoId,
+            //                                        i => i.Product);
+            //}
+            //else
+            //{
+            //    model.Tests = _testRepository.Lookup(model.CategoriaIdEnsayos, model.BuscarEnsayos, cond_empresa, cond_fuente, cond_provincia, cond_localidad, cond_campana, list_atributo);
+            //}
+
 
             if (model.Tests != null && model.Tests.Count > 0)
             {
@@ -609,7 +199,7 @@ namespace AgroEnsayos.Controllers
             }
 
             ////////////////////// Ordenar y Agrupar //////////////////////////////
-            
+
             if (newSort != "" && model.Tests != null)
             {
                 oldSort = newSort;
@@ -623,13 +213,13 @@ namespace AgroEnsayos.Controllers
             //////////////////////////////////////////////////////////////
 
             ///////////// Guardar Parametros /////////////////////
-            ViewBag.Filtros = _attributeRepository.GetFilters(model.CategoriaIdEnsayos).Distinct();
-            ViewBag.Empresas = _companyRepository.Get(c => !c.IsDisabled && c.Products.Select(p => p.CategoryId).Contains(model.CategoriaIdEnsayos)).Distinct();
-            ViewBag.Provincias = model.Tests.Select(t => t.Place.Province).Distinct();
-            ViewBag.Localidades = model.Tests.Select(t => t.Place.Locality).Distinct();
-            ViewBag.Fuentes = model.Tests.Select(t => t.Source).Distinct();
+            ViewBag.Filtros = _attributeRepository.GetFilters(model.CategoriaIdEnsayos);
+            ViewBag.Empresas = _companyRepository.Get(c => !c.IsDisabled && c.Products.Select(p => p.CategoryId).Distinct().Contains(model.CategoriaIdEnsayos));
+            ViewBag.Provincias = _placeRepository.GetProvincesWithTests(model.CategoriaIdEnsayos);
+            ViewBag.Localidades = _placeRepository.GetLocalitiesWithTests(model.CategoriaIdEnsayos);
+            ViewBag.Fuentes = _testRepository.GetSources();
             ViewBag.Campanas = _campaignRepository.Get(c => c.CategoryId == model.CategoriaIdEnsayos);
-            
+
             ViewBag.OldSort = oldSort;
             ViewBag.SelectAgroup = select_agroup;
 
@@ -639,8 +229,15 @@ namespace AgroEnsayos.Controllers
             }
             ViewBag.list_filters = list_filters;
 
+
+            var searchParams = new TestsSearchParams(_attributeRepository, list_filters, CategoriaIdEnsayos, BuscarEnsayos, FiltroFuente, FiltroCampana, FiltroCampanaId, FiltroLocalidad);
+            var searchParamsDto = Mapper.Map<TestSearchParamsDto>(searchParams);
+
+            model.TestsCount = _testRepository.LookupCount(searchParamsDto);
+
             return View(model);
         }
+
 
         //TODO: Completar;
         [Authorize()]
@@ -648,6 +245,145 @@ namespace AgroEnsayos.Controllers
         public string GetChartData(int categoriaId, int campanaId, int lugarId, string fuente)
         {
             return string.Empty; //EnsayoService.Get(categoriaId, null, campanaId, lugarId, fuente, true).ToJson();
+        }
+
+    }
+
+    public class TestsSearchParams : SearchParams
+    {
+        public TestsSearchParams(IAttributeRepository attributeRepo, List<string> list_filters = null, int CategoriaIdEnsayos = 0, string BuscarEnsayos = "", string FiltroFuente = "", string FiltroCampana = "", string FiltroCampanaId = "", string FiltroLocalidad = "")
+        {
+            string cond_empresa = "";
+            string cond_fuente = "";
+            string cond_provincia = "";
+            string cond_localidad = "";
+            string cond_campana = "";
+            List<string> list_atributo = new List<string>();
+
+            string strRubro = "";
+            string strId = "";
+            string strValor = "";
+
+            int tam = 0;
+            int tam_aux = 0;
+
+            //Parsear filtro y sacar datos para armar la condicion
+            if (list_filters != null && list_filters.Count > 0)
+            {
+                foreach (String strFilter in list_filters)
+                {
+                    tam = strFilter.IndexOf("--");
+                    strRubro = strFilter.Substring(0, tam);
+
+                    tam_aux = tam + 2;
+                    tam = strFilter.IndexOf("--", tam_aux);
+                    strId = strFilter.Substring(tam_aux, tam - tam_aux);
+
+                    tam_aux = tam + 2;
+                    strValor = strFilter.Substring(tam_aux);
+
+                    if (strRubro == "Empresa")
+                    {
+                        cond_empresa = cond_empresa + "," + strId;
+                    }
+                    else if (strRubro == "Provincia")
+                    {
+                        cond_provincia = cond_provincia + "," + strId;
+                    }
+                    else if (strRubro == "Localidad")
+                    {
+                        cond_localidad = cond_localidad + "," + strId;
+                    }
+                    else if (strRubro == "Campana")
+                    {
+                        cond_campana = cond_campana + "," + strId;
+                    }
+                    else if (strRubro == "Fuente")
+                    {
+                        cond_fuente = cond_fuente + "," + strId;
+                    }
+                    else
+                    {
+                        list_atributo.Add(strId + "--" + strValor);
+                    }
+                }
+            }
+
+            if (cond_empresa != "")
+                cond_empresa = cond_empresa + ",";
+            if (cond_provincia != "")
+                cond_provincia = cond_provincia + ",";
+            if (cond_fuente != "")
+                cond_fuente = cond_fuente + ",";
+            if (cond_campana != "")
+                cond_campana = cond_campana + ",";
+            if (cond_localidad != "")
+                cond_localidad = cond_localidad + ",";
+
+            this.CategoryId = CategoriaIdEnsayos;
+            this.Companies = SplitIntegers(cond_empresa);
+            this.Sources = SplitStrings(cond_fuente);
+            this.Provinces = SplitStrings(cond_provincia);
+            this.Localities = SplitStrings(cond_localidad);
+            this.Campaigns = SplitIntegers(cond_campana);
+            this.SearchTerm = BuscarEnsayos;
+
+            Dictionary<int, string> attrsDic = SplitAttributes(list_atributo);
+            List<int> attrMappingIds = new List<int>();
+            var attributesPredicate = PredicateBuilder.True<Test>();
+
+            foreach (var attr in attrsDic)
+            {
+                var mappingIds = attributeRepo.Single(a => a.Id == attr.Key).AttributeMappings.Where(m => m.MappedValue == attr.Value).Select(m => m.AttributeMappingId).ToList();
+                attributesPredicate = attributesPredicate.And(t => t.Product.AttributeMappings.Any(m => mappingIds.Contains(m.AttributeMappingId)));
+            }
+
+            this.AttributesPredicate = attributesPredicate;
+        }
+
+
+        public int CategoryId { get; set; }
+
+        public IEnumerable<int> Companies { get; private set; }
+        public IEnumerable<string> Sources { get; private set; }
+        public IEnumerable<string> Provinces { get; private set; }
+        public IEnumerable<string> Localities { get; private set; }
+        public IEnumerable<int> Campaigns { get; private set; }
+        public string SearchTerm { get; set; }
+
+        public Expression<Func<Test, bool>> AttributesPredicate { get; private set; }
+
+    }
+
+    public abstract class SearchParams
+    {
+        protected string[] SplitStrings(string param)
+        {
+            return param.Trim(',').Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        protected IEnumerable<int> SplitIntegers(string param)
+        {
+            return param.Trim(',')
+                        .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(int.Parse);
+        }
+
+        protected Dictionary<int, string> SplitAttributes(List<string> parameters)
+        {
+            Dictionary<int, string> attrs = new Dictionary<int, string>();
+
+            if (parameters != null)
+            {
+                string[] keyValue = new string[2];
+                foreach (var a in parameters)
+                {
+                    keyValue = a.Split(new string[] { "--" }, StringSplitOptions.RemoveEmptyEntries);
+                    attrs.Add(Convert.ToInt32(keyValue[0]), keyValue[1]);
+                }
+            }
+
+            return attrs;
         }
     }
 }

@@ -51,7 +51,6 @@ BEGIN
 	AND (@provincia = '' OR CHARINDEX(','+cast(l.[Province] as varchar)+',', @provincia) > 0   )
 	AND (@localidad = '' OR CHARINDEX(','+cast(l.[Locality] as varchar)+',', @localidad) > 0   )
 	AND (@campana = '' OR (@campana != '' AND en.[CampaignId] in (select c.Id from [Campaigns] c where c.[CategoryId] = @categoriaId and CHARINDEX(',' + cast(c.Id as VARCHAR) + ',', @campana) > 0 ))) 
-	
 	AND (@searchTerm = '' OR (@searchTerm != '' AND (CHARINDEX(@searchTerm, p.[Name]) > 0 
 		OR CHARINDEX(@searchTerm, en.[Source]) > 0
 		OR CHARINDEX(@searchTerm, e.[Name]) > 0

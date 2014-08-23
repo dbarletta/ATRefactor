@@ -125,43 +125,42 @@ function GetEnsayoFromNextPage(scrollPage) {
 
             $.each(data, function (index, section) {
                 var sectionIndex = (isHistoryBack ? index + 1 : rowid);
-                //alert(JSON.stringify(section));
 
                 switch (selectAgroup) {
                     case "campana":
-                        if (selectAgroupAux != section.Campana || selectAgroupAux == "") {
-                            articleData += '<tr class="agroup_tr"><td colspan="9" class="agroup_td">' + section.Campana + '</td></tr>';
-                            selectAgroupAux = section.Campana;
+                        if (selectAgroupAux != section.CampaignName || selectAgroupAux == "") {
+                            articleData += '<tr class="agroup_tr"><td colspan="9" class="agroup_td">' + section.CampaignName + '</td></tr>';
+                            selectAgroupAux = section.CampaignName;
                         }
                         break;
                     case "fuente":
-                        if (selectAgroupAux != section.Fuente || selectAgroupAux == "") {
-                            articleData += '<tr class="agroup_tr"><td colspan="9" class="agroup_td">' + section.Fuente + '</td></tr>';
-                            selectAgroupAux = section.Fuente;
+                        if (selectAgroupAux != section.Source || selectAgroupAux == "") {
+                            articleData += '<tr class="agroup_tr"><td colspan="9" class="agroup_td">' + section.Source + '</td></tr>';
+                            selectAgroupAux = section.Source;
                         }
                         break;
                     case "producto":
-                        if (selectAgroupAux != section.Producto || selectAgroupAux == "") {
-                            articleData += '<tr class="agroup_tr"><td colspan="9" class="agroup_td">' + section.Producto + '</td></tr>';
-                            selectAgroupAux = section.Producto;
+                        if (selectAgroupAux != section.ProductName || selectAgroupAux == "") {
+                            articleData += '<tr class="agroup_tr"><td colspan="9" class="agroup_td">' + section.ProductName + '</td></tr>';
+                            selectAgroupAux = section.ProductName;
                         }
                         break;
                     case "provincia":
-                        if (selectAgroupAux != section.Provincia || selectAgroupAux == "") {
-                            articleData += '<tr class="agroup_tr"><td colspan="9" class="agroup_td">' + section.Provincia + '</td></tr>';
-                            selectAgroupAux = section.Provincia;
+                        if (selectAgroupAux != section.PlaceProvince || selectAgroupAux == "") {
+                            articleData += '<tr class="agroup_tr"><td colspan="9" class="agroup_td">' + section.PlaceProvince + '</td></tr>';
+                            selectAgroupAux = section.PlaceProvince;
                         }
                         break;
                     case "localidad":
-                        if (selectAgroupAux != section.Localidad || selectAgroupAux == "") {
-                            articleData += '<tr class="agroup_tr"><td colspan="9" class="agroup_td">' + section.Localidad + '</td></tr>';
-                            selectAgroupAux = section.Localidad;
+                        if (selectAgroupAux != section.PlaceLocality || selectAgroupAux == "") {
+                            articleData += '<tr class="agroup_tr"><td colspan="9" class="agroup_td">' + section.PlaceLocality + '</td></tr>';
+                            selectAgroupAux = section.PlaceLocality;
                         }
                         break;
                     case "rinde":
-                        if (selectAgroupAux != section.Rinde || selectAgroupAux == "") {
-                            articleData += '<tr class="agroup_tr"><td colspan="9" class="agroup_td">' + section.Rinde + '</td></tr>';
-                            selectAgroupAux = section.Rinde;
+                        if (selectAgroupAux != section.Yield || selectAgroupAux == "") {
+                            articleData += '<tr class="agroup_tr"><td colspan="9" class="agroup_td">' + section.Yield + '</td></tr>';
+                            selectAgroupAux = section.Yield;
                         }
                         break;
 
@@ -169,19 +168,19 @@ function GetEnsayoFromNextPage(scrollPage) {
 
                 articleData += '<tr>';
                 
-                articleData += '<td><a href="#" onclick=\'SendFiltro1("' + section.Fuente + '","' + section.Campana + '","' + section.Localidad + '","' + section.CampanaId + '")\'><img src="../Images/verensayo.png" title="Haga un click aqui para ver este ensayo completo" /></a></td>';
-                articleData += '<td><a href="#" onclick=\'SendFiltro2("' + $("#CategoriaIdEnsayos").val() + '","' + section.Fuente + '","' + section.LugarId + '","' + section.CampanaId + '")\'><img src="../Images/Chart_16x16.png" title="Haga un click aqui para ver el gráfico de este ensayo" /></a></td>';
+                articleData += '<td><a href="#" onclick=\'SendFiltro1("' + section.Source + '","' + section.CampaignName + '","' + section.PlaceLocality + '","' + section.CampaignId + '")\'><img src="../Images/verensayo.png" title="Haga un click aqui para ver este ensayo completo" /></a></td>';
+                articleData += '<td><a href="#" onclick=\'SendFiltro2("' + $("#CategoriaIdEnsayos").val() + '","' + section.Source + '","' + section.PlaceId + '","' + section.CampaignId + '")\'><img src="../Images/Chart_16x16.png" title="Haga un click aqui para ver el gráfico de este ensayo" /></a></td>';
 
-                articleData += '<td>' + section.Campana + '</td>';
-                articleData += '<td>' + section.Fuente + '</td>';
+                articleData += '<td>' + section.CampaignName + '</td>';
+                articleData += '<td>' + section.Source + '</td>';
 
-                articleData += '<td><a href="javaScript:void(0);" class="table_link" onclick="SendProducto(' + section.ProductoId + ');" alt="Click aqui para ver la ficha de este producto" title="Click aqui para ver la ficha de este producto">' + section.Producto + '</a></td>';
+                articleData += '<td><a href="javaScript:void(0);" class="table_link" onclick="SendProducto(' + section.ProductId + ');" alt="Click aqui para ver la ficha de este producto" title="Click aqui para ver la ficha de este producto">' + section.ProductName + '</a></td>';
 
-                articleData += '<td>' + section.Provincia + '</td>';
-                articleData += '<td>' + section.Localidad + '</td>';
+                articleData += '<td>' + section.PlaceProvince + '</td>';
+                articleData += '<td>' + section.PlaceLocality + '</td>';
                 
-                articleData += '<td>' + section.Rinde.toFixed(0) + '</td>';
-                articleData += '<td>' + (section.Ranking / section.Total).toFixed(2) + '</td>';
+                articleData += '<td>' + section.Yield.toFixed(0) + '</td>';
+                //articleData += '<td>' + (section.Ranking / section.Total).toFixed(2) + '</td>';
 
                 articleData += '</tr>';
 

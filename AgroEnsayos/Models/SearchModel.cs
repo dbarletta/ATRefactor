@@ -28,6 +28,10 @@ namespace AgroEnsayos.Models
         public string Category { get; set; }
 
         public Dictionary<string, List<string>> dicFilter{get ; set;}
-    
+
+
+        public int TestsCount { get; set; }
+
+        public int ProductCount { get; set; }
     }
 }

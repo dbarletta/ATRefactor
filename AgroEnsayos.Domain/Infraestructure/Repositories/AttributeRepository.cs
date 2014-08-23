@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 using AgroEnsayos.Domain.Entities;
 using AgroEnsayos.Domain.Infraestructure.EF;
 using RefactorThis.GraphDiff;
+using System.Data.SqlClient;
+using System.Data.Entity;
 
 namespace AgroEnsayos.Domain.Infraestructure.Repositories
 {
-    public interface IAttributeRepository : IRepository<Entities.Attribute> 
+    public interface IAttributeRepository : IRepository<Entities.Attribute>
     {
         List<string> GetOriginalValues(int attributeId);
         void SaveGraph(Domain.Entities.Attribute attribute);
@@ -22,13 +24,13 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
         public AttributeRepository(IDataContextFactory factory)
             : base(factory)
         {
-            
+
         }
 
         //TODO: Chequear que devuelva valores que aun no tienen mappings.
         public List<string> GetOriginalValues(int attributeId)
         {
-            using(var ctx = _factory.Create() as DbAgrotool)
+            using (var ctx = _factory.Create() as DbAgrotool)
             {
                 var query = ctx.Attributes.Single(x => x.Id == attributeId)
                                           .AttributeMappings
@@ -55,11 +57,15 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
         {
             using (var ctx = _factory.Create() as DbAgrotool)
             {
-                var query = ctx.Categories.Single(c => c.Id == categoryId)
-                                .Attributes.Where(a => a.IsFilter)
-                                .OrderByDescending(a => new { a.Family, a.Name });
-                
-                    return query.ToList();
+                var query = ctx.Attributes.Where(a => a.Categories.Select(c => c.Id).Contains(categoryId)
+                                                   && a.AttributeMappings.Any()
+                                                   && a.IsFilter)
+                                           .Include(a => a.AttributeMappings)
+                                           .OrderByDescending(a => new { a.Family, a.Name });
+
+                var result = query.ToList();
+
+                return result;
             }
         }
     }
