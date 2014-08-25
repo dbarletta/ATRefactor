@@ -16,8 +16,10 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
 {
     public interface ITestRepository : IRepository<Test>
     {
-        List<Test> Lookup(TestSearchParamsDto searchParams, int skip, int take, string orderby, string thenby);
-        int LookupCount(TestSearchParamsDto searchParams);
+        List<Test> Lookup(TestSearchParamsDto searchParams, int skip, int take, string orderby, string thenby, IAttributeRepository attributeRepo);
+        int LookupCount(TestSearchParamsDto searchParams, IAttributeRepository attributeRepo);
+
+        List<Test> GetChartData(int categoriaId, int campanaId, int lugarId, string fuente);
 
         List<string> GetSources();
     }
@@ -30,12 +32,12 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
 
         }
 
-        public List<Test> Lookup(TestSearchParamsDto searchParams, int skip, int take, string orderBy, string thenBy)
+        public List<Test> Lookup(TestSearchParamsDto searchParams, int skip, int take, string orderBy, string thenBy, IAttributeRepository attributeRepo)
         {
             using (var ctx = _factory.Create() as DbAgrotool)
             {
                 //Predicate and conditions
-                var query = ApplyConditions(ctx.Tests, searchParams.CategoryId, searchParams.Companies, searchParams.Sources, searchParams.Provinces, searchParams.Localities, searchParams.Campaigns, searchParams.AttributesPredicate, searchParams.SearchTerm);
+                var query = ApplyConditions(ctx.Tests, searchParams, attributeRepo);
 
                 //Includes
                 query = query.Include(t => t.Campaign)
@@ -56,12 +58,12 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
             }
         }
 
-        public int LookupCount(TestSearchParamsDto searchParams)
+        public int LookupCount(TestSearchParamsDto searchParams, IAttributeRepository attributeRepo)
         {
             using (var ctx = _factory.Create() as DbAgrotool)
             {
                 //Predicate and conditions
-                var query = ApplyConditions(ctx.Tests, searchParams.CategoryId, searchParams.Companies, searchParams.Sources, searchParams.Provinces, searchParams.Localities, searchParams.Campaigns, searchParams.AttributesPredicate, searchParams.SearchTerm);
+                var query = ApplyConditions(ctx.Tests, searchParams, attributeRepo);
 
                 return query.Count();
             }
@@ -78,13 +80,48 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
                 return tests;
             }
         }
+        
+        public List<Test> GetChartData(int categoriaId, int campanaId, int lugarId, string fuente)
+        {
+            using (var ctx = _factory.Create() as DbAgrotool)
+            {
+                var query = ctx.Tests.Where(t => (categoriaId == 0 || t.Product.CategoryId == categoriaId)
+                                              && (campanaId == 0 || t.CampaignId == campanaId)
+                                              && (lugarId == 0 || t.PlaceId == lugarId)
+                                              && (string.IsNullOrEmpty(fuente) || t.Source == fuente))
+                                     .Include(t => t.Product);
 
+                var top5 = query.OrderByDescending(t => t.Yield).Take(5);
+
+                var last = query.OrderBy(t => t.Yield).First();
+                last.Product.Name = "ULTIMO";
+
+                var average = new Test()
+                {
+                    Product = new Product { Name = "PROMEDIO" },
+                    Yield = query.Average(x => x.Yield)
+                };
+
+                var result = new List<Test>();
+
+                result.AddRange(top5.ToList());
+                result.Add(last);
+                result.Add(average);
+
+                return result;
+            }
+        }
 
 
 
         private IQueryable<Test> OrderByThenBy(IQueryable<Test> tests, string sortBy, string thenBy)
         {
             IOrderedQueryable<Test> ordered = null;
+
+            if(string.IsNullOrEmpty(sortBy))
+            {
+                sortBy = thenBy.Replace("Asc", "");
+            }
 
             switch (sortBy)
             {
@@ -93,6 +130,14 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
                 case "producto": ordered = tests.OrderBy(t => t.Product.Name); break;
                 case "provincia": ordered = tests.OrderBy(t => t.Place.Province); break;
                 case "localidad": ordered = tests.OrderBy(t => t.Place.Locality); break;
+                case "rinde": ordered = tests.OrderBy(t => t.Yield); break;
+
+                case "fuenteDesc": ordered = tests.OrderByDescending(t => t.Source); break;
+                case "campanaDesc": ordered = tests.OrderByDescending(t => t.Campaign.Name); break;
+                case "productoDesc": ordered = tests.OrderByDescending(t => t.Product.Name); break;
+                case "provinciaDesc": ordered = tests.OrderByDescending(t => t.Place.Province); break;
+                case "localidadDesc": ordered = tests.OrderByDescending(t => t.Place.Locality); break;
+                case "rindeDesc": 
                 default: ordered = tests.OrderByDescending(t => t.Yield); break;
             }
 
@@ -105,7 +150,7 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
                 case "localidadAsc": tests = ordered.ThenBy(t => t.Place.Locality); break;
                 case "rindeAsc": tests = ordered.ThenBy(t => t.Yield); break;
 
-                case "fuente": tests = ordered.ThenByDescending(t => t.Source); break;
+                case "fuenteDesc": tests = ordered.ThenByDescending(t => t.Source); break;
                 case "campanaDesc": tests = ordered.ThenByDescending(t => t.Campaign.Name); break;
                 case "productoDesc": tests = ordered.ThenByDescending(t => t.Product.Name); break;
                 case "provinciaDesc": tests = ordered.ThenByDescending(t => t.Place.Province); break;
@@ -116,306 +161,45 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
             }
 
             return tests;
-
-            #region CommentedOut
-            //switch (sortBy)
-            //{
-            //    case "campanaAsc":
-            //        switch (thenBy)
-            //        {
-            //            case "fuente":
-            //                tests = tests.OrderBy(s => s.Source).ThenBy(s => s.Campaign);
-            //                break;
-            //            case "producto":
-            //                tests = tests.OrderBy(s => s.Product.Name).ThenBy(s => s.Campaign.Name);
-            //                break;
-            //            case "provincia":
-            //                tests = tests.OrderBy(s => s.Place.Province).ThenBy(s => s.Campaign.Name);
-            //                break;
-            //            case "localidad":
-            //                tests = tests.OrderBy(s => s.Place.Locality).ThenBy(s => s.Campaign.Name);
-            //                break;
-            //            case "rinde":
-            //                tests = tests.OrderBy(s => s.Yield).ThenBy(s => s.Campaign);
-            //                break;
-            //            default:
-            //                tests = tests.OrderBy(s => s.Campaign);
-            //                break;
-            //        }
-            //        break;
-            //    case "productoAsc":
-            //        switch (thenBy)
-            //        {
-            //            case "fuente":
-            //                tests = tests.OrderBy(s => s.Source).ThenBy(s => s.Product.Name);
-            //                break;
-            //            case "campana":
-            //                tests = tests.OrderBy(s => s.Campaign).ThenBy(s => s.Product.Name);
-            //                break;
-            //            case "provincia":
-            //                tests = tests.OrderBy(s => s.Place.Province).ThenBy(s => s.Product.Name);
-            //                break;
-            //            case "localidad":
-            //                tests = tests.OrderBy(s => s.Place.Locality).ThenBy(s => s.Product.Name);
-            //                break;
-            //            case "rinde":
-            //                tests = tests.OrderBy(s => s.Yield).ThenBy(s => s.Product.Name);
-            //                break;
-            //            default:
-            //                tests = tests.OrderBy(s => s.Product.Name);
-            //                break;
-            //        }
-            //        break;
-            //    case "fuenteAsc":
-            //        switch (thenBy)
-            //        {
-            //            case "producto":
-            //                tests = tests.OrderBy(s => s.Product.Name).ThenBy(s => s.Source);
-            //                break;
-            //            case "campana":
-            //                tests = tests.OrderBy(s => s.Campaign).ThenBy(s => s.Source);
-            //                break;
-            //            case "provincia":
-            //                tests = tests.OrderBy(s => s.Place.Province).ThenBy(s => s.Source);
-            //                break;
-            //            case "localidad":
-            //                tests = tests.OrderBy(s => s.Place.Locality).ThenBy(s => s.Source);
-            //                break;
-            //            case "rinde":
-            //                tests = tests.OrderBy(s => s.Yield).ThenBy(s => s.Source);
-            //                break;
-            //            default:
-            //                tests = tests.OrderBy(s => s.Source);
-            //                break;
-            //        }
-            //        break;
-            //    case "provinciaAsc":
-            //        switch (thenBy)
-            //        {
-            //            case "producto":
-            //                tests = tests.OrderBy(s => s.Product.Name).ThenBy(s => s.Place.Province);
-            //                break;
-            //            case "campana":
-            //                tests = tests.OrderBy(s => s.Campaign).ThenBy(s => s.Place.Province);
-            //                break;
-            //            case "fuente":
-            //                tests = tests.OrderBy(s => s.Source).ThenBy(s => s.Place.Province);
-            //                break;
-            //            case "localidad":
-            //                tests = tests.OrderBy(s => s.Place.Locality).ThenBy(s => s.Place.Province);
-            //                break;
-            //            case "rinde":
-            //                tests = tests.OrderBy(s => s.Yield).ThenBy(s => s.Place.Province);
-            //                break;
-            //            default:
-            //                tests = tests.OrderBy(s => s.Place.Province);
-            //                break;
-            //        }
-            //        break;
-            //    case "localidadAsc":
-            //        switch (thenBy)
-            //        {
-            //            case "producto":
-            //                tests = tests.OrderBy(s => s.Product.Name).ThenBy(s => s.Place.Locality);
-            //                break;
-            //            case "campana":
-            //                tests = tests.OrderBy(s => s.Campaign).ThenBy(s => s.Place.Locality);
-            //                break;
-            //            case "fuente":
-            //                tests = tests.OrderBy(s => s.Source).ThenBy(s => s.Place.Locality);
-            //                break;
-            //            case "provincia":
-            //                tests = tests.OrderBy(s => s.Place.Province).ThenBy(s => s.Place.Locality);
-            //                break;
-            //            case "rinde":
-            //                tests = tests.OrderBy(s => s.Yield).ThenBy(s => s.Place.Locality);
-            //                break;
-            //            default:
-            //                tests = tests.OrderBy(s => s.Place.Locality);
-            //                break;
-            //        }
-            //        break;
-            //    case "rindeAsc":
-            //        switch (thenBy)
-            //        {
-            //            case "producto":
-            //                tests = tests.OrderBy(s => s.Product.Name).ThenBy(s => s.Yield);
-            //                break;
-            //            case "campana":
-            //                tests = tests.OrderBy(s => s.Campaign).ThenBy(s => s.Yield);
-            //                break;
-            //            case "fuente":
-            //                tests = tests.OrderBy(s => s.Source).ThenBy(s => s.Yield);
-            //                break;
-            //            case "provincia":
-            //                tests = tests.OrderBy(s => s.Place.Province).ThenBy(s => s.Yield);
-            //                break;
-            //            case "localidad":
-            //                tests = tests.OrderBy(s => s.Place.Locality).ThenBy(s => s.Yield);
-            //                break;
-            //            default:
-            //                tests = tests.OrderBy(s => s.Yield);
-            //                break;
-            //        }
-            //        break;
-
-            //    case "campanaDesc":
-            //        switch (thenBy)
-            //        {
-            //            case "fuente":
-            //                tests = tests.OrderBy(s => s.Source).ThenByDescending(s => s.Campaign);
-            //                break;
-            //            case "producto":
-            //                tests = tests.OrderBy(s => s.Product.Name).ThenByDescending(s => s.Campaign);
-            //                break;
-            //            case "provincia":
-            //                tests = tests.OrderBy(s => s.Place.Province).ThenByDescending(s => s.Campaign);
-            //                break;
-            //            case "localidad":
-            //                tests = tests.OrderBy(s => s.Place.Locality).ThenByDescending(s => s.Campaign);
-            //                break;
-            //            case "rinde":
-            //                tests = tests.OrderBy(s => s.Yield).ThenByDescending(s => s.Campaign);
-            //                break;
-            //            default:
-            //                tests = tests.OrderByDescending(s => s.Campaign);
-            //                break;
-            //        }
-            //        break;
-            //    case "productoDesc":
-            //        switch (thenBy)
-            //        {
-            //            case "fuente":
-            //                tests = tests.OrderBy(s => s.Source).ThenByDescending(s => s.Product.Name);
-            //                break;
-            //            case "campana":
-            //                tests = tests.OrderBy(s => s.Campaign).ThenByDescending(s => s.Product.Name);
-            //                break;
-            //            case "provincia":
-            //                tests = tests.OrderBy(s => s.Place.Province).ThenByDescending(s => s.Product.Name);
-            //                break;
-            //            case "localidad":
-            //                tests = tests.OrderBy(s => s.Place.Locality).ThenByDescending(s => s.Product.Name);
-            //                break;
-            //            case "rinde":
-            //                tests = tests.OrderBy(s => s.Yield).ThenByDescending(s => s.Product.Name);
-            //                break;
-            //            default:
-            //                tests = tests.OrderByDescending(s => s.Product.Name);
-            //                break;
-            //        }
-            //        break;
-            //    case "fuenteDesc":
-            //        switch (thenBy)
-            //        {
-            //            case "producto":
-            //                tests = tests.OrderBy(s => s.Product.Name).ThenByDescending(s => s.Source);
-            //                break;
-            //            case "campana":
-            //                tests = tests.OrderBy(s => s.Campaign).ThenByDescending(s => s.Source);
-            //                break;
-            //            case "provincia":
-            //                tests = tests.OrderBy(s => s.Place.Province).ThenByDescending(s => s.Source);
-            //                break;
-            //            case "localidad":
-            //                tests = tests.OrderBy(s => s.Place.Locality).ThenByDescending(s => s.Source);
-            //                break;
-            //            case "rinde":
-            //                tests = tests.OrderBy(s => s.Yield).ThenByDescending(s => s.Source);
-            //                break;
-            //            default:
-            //                tests = tests.OrderByDescending(s => s.Source);
-            //                break;
-            //        }
-            //        break;
-            //    case "provinciaDesc":
-            //        switch (thenBy)
-            //        {
-            //            case "producto":
-            //                tests = tests.OrderBy(s => s.Product.Name).ThenByDescending(s => s.Place.Province);
-            //                break;
-            //            case "campana":
-            //                tests = tests.OrderBy(s => s.Campaign).ThenByDescending(s => s.Place.Province);
-            //                break;
-            //            case "fuente":
-            //                tests = tests.OrderBy(s => s.Source).ThenByDescending(s => s.Place.Province);
-            //                break;
-            //            case "localidad":
-            //                tests = tests.OrderBy(s => s.Place.Locality).ThenByDescending(s => s.Place.Province);
-            //                break;
-            //            case "rinde":
-            //                tests = tests.OrderBy(s => s.Yield).ThenByDescending(s => s.Place.Province);
-            //                break;
-            //            default:
-            //                tests = tests.OrderByDescending(s => s.Place.Province);
-            //                break;
-            //        }
-            //        break;
-            //    case "localidadDesc":
-            //        switch (thenBy)
-            //        {
-            //            case "producto":
-            //                tests = tests.OrderBy(s => s.Product.Name).ThenByDescending(s => s.Place.Locality);
-            //                break;
-            //            case "campana":
-            //                tests = tests.OrderBy(s => s.Campaign).ThenByDescending(s => s.Place.Locality);
-            //                break;
-            //            case "fuente":
-            //                tests = tests.OrderBy(s => s.Source).ThenByDescending(s => s.Place.Locality);
-            //                break;
-            //            case "provincia":
-            //                tests = tests.OrderBy(s => s.Place.Province).ThenByDescending(s => s.Place.Locality);
-            //                break;
-            //            case "rinde":
-            //                tests = tests.OrderBy(s => s.Yield).ThenByDescending(s => s.Place.Locality);
-            //                break;
-            //            default:
-            //                tests = tests.OrderByDescending(s => s.Place.Locality);
-            //                break;
-            //        }
-            //        break;
-            //    case "rindeDesc":
-            //        switch (thenBy)
-            //        {
-            //            case "producto":
-            //                tests = tests.OrderBy(s => s.Product.Name).ThenByDescending(s => s.Yield);
-            //                break;
-            //            case "campana":
-            //                tests = tests.OrderBy(s => s.Campaign).ThenByDescending(s => s.Yield);
-            //                break;
-            //            case "fuente":
-            //                tests = tests.OrderBy(s => s.Source).ThenByDescending(s => s.Yield);
-            //                break;
-            //            case "provincia":
-            //                tests = tests.OrderBy(s => s.Place.Province).ThenByDescending(s => s.Yield);
-            //                break;
-            //            case "localidad":
-            //                tests = tests.OrderBy(s => s.Place.Locality).ThenByDescending(s => s.Yield);
-            //                break;
-            //            default:
-            //                tests = tests.OrderByDescending(s => s.Yield);
-            //                break;
-            //        }
-            //        break;
-
-            //}
-
-            //return tests; 
-            #endregion
         }
 
-        private IQueryable<Test> ApplyConditions(IQueryable<Test> tests, int categoryId, IEnumerable<int> companies, IEnumerable<string> sources, IEnumerable<string> provinces, IEnumerable<string> localities, IEnumerable<int> campaigns, Expression<Func<Test, bool>> attributeFiltersCondition, string searchTerm)
+        private IQueryable<Test> ApplyConditions(IQueryable<Test> tests, TestSearchParamsDto searchParams, IAttributeRepository attributeRepo)
         {
-            var query = tests.Where(test => test.Product.CategoryId == categoryId 
-                                         && (!companies.Any() || companies.Contains(test.Product.CompanyId))
-                                         && (!sources.Any() || sources.Contains(test.Source))
-                                         && (!provinces.Any() || provinces.Contains(test.Place.Province))
-                                         && (!localities.Any() || localities.Contains(test.Place.Locality))
-                                         && (!campaigns.Any() || (campaigns.Contains(test.CampaignId)) && test.Campaign.CategoryId == categoryId))
-                             .Where(attributeFiltersCondition);
+            //attribute filters
+            var attributesPredicate = PredicateBuilder.True<Test>();
+            foreach (var attr in searchParams.AttributeFilters)
+            {
+                var mappingIds = attributeRepo.Single(a => a.Id == attr.Key).AttributeMappings.Where(m => m.MappedValue == attr.Value).Select(m => m.AttributeMappingId).ToList();
+                attributesPredicate = attributesPredicate.And(t => t.Product.AttributeMappings.Any(m => mappingIds.Contains(m.AttributeMappingId)));
+            }
+
+            //free text search
+            var term = searchParams.SearchTerm;
+            var searchTermPredicate = PredicateBuilder.False<Test>();
+            searchTermPredicate = searchTermPredicate.Or(t => t.Product.Category.Name.Contains(term));
+            searchTermPredicate = searchTermPredicate.Or(t => t.Product.Name.Contains(term));
+            searchTermPredicate = searchTermPredicate.Or(t => t.Source.Contains(term));
+            searchTermPredicate = searchTermPredicate.Or(t => t.Product.Company.Name.Contains(term));
+            searchTermPredicate = searchTermPredicate.Or(t => t.Place.Province.Contains(term));
+            searchTermPredicate = searchTermPredicate.Or(t => t.Place.Locality.Contains(term));
+            searchTermPredicate = searchTermPredicate.Or(t => t.Place.Department.Contains(term));
+            searchTermPredicate = searchTermPredicate.Or(t => t.Place.Header.Contains(term));
+            searchTermPredicate = searchTermPredicate.Or(t => t.Place.Region.Contains(term));
+            searchTermPredicate = searchTermPredicate.Or(t => t.Product.AttributeMappings.Select(a => a.Attribute.Name).Any(attName => attName.Contains(term)));
+            searchTermPredicate = searchTermPredicate.Or(t => t.Product.AttributeMappings.Select(a => a.Attribute.Tags).Any(attTag => attTag.Contains(term)));
+
+            //final query predicate
+            var query = tests.Where(test => test.Product.CategoryId == searchParams.CategoryId
+                                         && (!searchParams.Companies.Any() || searchParams.Companies.Contains(test.Product.CompanyId))
+                                         && (!searchParams.Sources.Any() || searchParams.Sources.Contains(test.Source))
+                                         && (!searchParams.Provinces.Any() || searchParams.Provinces.Contains(test.Place.Province))
+                                         && (!searchParams.Localities.Any() || searchParams.Localities.Contains(test.Place.Locality))
+                                         && (!searchParams.Campaigns.Any() || (searchParams.Campaigns.Contains(test.CampaignId)) && test.Campaign.CategoryId == searchParams.CategoryId))
+                             .Where(attributesPredicate)
+                             .Where(searchTermPredicate);
 
             return query;
         }
-
+        
     }
 }

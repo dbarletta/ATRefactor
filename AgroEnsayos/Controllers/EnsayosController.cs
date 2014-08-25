@@ -52,7 +52,7 @@ namespace AgroEnsayos.Controllers
             var searchParams = new TestsSearchParams(_attributeRepository, list_filters, CategoriaIdEnsayos, BuscarEnsayos, FiltroFuente, FiltroCampana, FiltroCampanaId, FiltroLocalidad);
             var searchParamsDto = Mapper.Map<TestSearchParamsDto>(searchParams);
 
-            var tests = _testRepository.Lookup(searchParamsDto, skip, take, select_agroup, newSort);
+            var tests = _testRepository.Lookup(searchParamsDto, skip, take, select_agroup, newSort, _attributeRepository);
 
             var dto = Mapper.Map<List<TestDto>>(tests);
             return Json(dto);
@@ -233,18 +233,19 @@ namespace AgroEnsayos.Controllers
             var searchParams = new TestsSearchParams(_attributeRepository, list_filters, CategoriaIdEnsayos, BuscarEnsayos, FiltroFuente, FiltroCampana, FiltroCampanaId, FiltroLocalidad);
             var searchParamsDto = Mapper.Map<TestSearchParamsDto>(searchParams);
 
-            model.TestsCount = _testRepository.LookupCount(searchParamsDto);
+            model.TestsCount = _testRepository.LookupCount(searchParamsDto, _attributeRepository);
 
             return View(model);
         }
 
-
-        //TODO: Completar;
         [Authorize()]
         [HttpGet()]
         public string GetChartData(int categoriaId, int campanaId, int lugarId, string fuente)
         {
-            return string.Empty; //EnsayoService.Get(categoriaId, null, campanaId, lugarId, fuente, true).ToJson();
+            var tests = _testRepository.GetChartData(categoriaId, campanaId, lugarId, fuente);
+            var dtos = Mapper.Map<List<TestDto>>(tests);
+
+            return dtos.ToJson();
         }
 
     }
@@ -328,17 +329,9 @@ namespace AgroEnsayos.Controllers
             this.Campaigns = SplitIntegers(cond_campana);
             this.SearchTerm = BuscarEnsayos;
 
-            Dictionary<int, string> attrsDic = SplitAttributes(list_atributo);
-            List<int> attrMappingIds = new List<int>();
-            var attributesPredicate = PredicateBuilder.True<Test>();
+            this.AttributeFilters = SplitAttributes(list_atributo);
 
-            foreach (var attr in attrsDic)
-            {
-                var mappingIds = attributeRepo.Single(a => a.Id == attr.Key).AttributeMappings.Where(m => m.MappedValue == attr.Value).Select(m => m.AttributeMappingId).ToList();
-                attributesPredicate = attributesPredicate.And(t => t.Product.AttributeMappings.Any(m => mappingIds.Contains(m.AttributeMappingId)));
-            }
-
-            this.AttributesPredicate = attributesPredicate;
+            
         }
 
 
@@ -349,9 +342,9 @@ namespace AgroEnsayos.Controllers
         public IEnumerable<string> Provinces { get; private set; }
         public IEnumerable<string> Localities { get; private set; }
         public IEnumerable<int> Campaigns { get; private set; }
-        public string SearchTerm { get; set; }
+        public string SearchTerm { get; private set; }
 
-        public Expression<Func<Test, bool>> AttributesPredicate { get; private set; }
+        public Dictionary<int, string> AttributeFilters { get; private set; }
 
     }
 

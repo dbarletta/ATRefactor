@@ -16,6 +16,6 @@ namespace AgroEnsayos.Domain.Entities.Dto
         public IEnumerable<string> Localities { get; private set; }
         public IEnumerable<int> Campaigns { get; private set; }
         public string SearchTerm { get; set; }
-        public Expression<Func<Test, bool>> AttributesPredicate { get; private set; }
+        public Dictionary<int, string> AttributeFilters { get; private set; }
     }
 }

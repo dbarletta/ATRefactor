@@ -2,7 +2,7 @@
 @using AgroEnsayos.Domain.Entities;
 @using AgroEnsayos.Helpers;
 @{
-    IList<AgroEnsayos.Domain.Entities.Attribute> filtros = ViewBag.Filtros as IList<AgroEnsayos.Domain.Entities.Attribute>;
+    IList<AttributeMapping> filtros = ViewBag.Filtros as IList<AttributeMapping>;
     IList<String> localidad = ViewBag.Localidades as IList<String>;
     IList<String> provincia = ViewBag.Provincias as IList<String>;
     IList<Campaign> campana = ViewBag.Campanas as IList<Campaign>;
@@ -20,7 +20,7 @@
     string auxRubro = "";
     string auxNombre = "";
     string auxRubro_ultimo = "";
-    List<AgroEnsayos.Domain.Entities.Attribute> auxFiltro = new List<AgroEnsayos.Domain.Entities.Attribute>();
+    List<AttributeMapping> auxFiltro = new List<AttributeMapping>();
 
     Dictionary<string, IList<string>> dicStr = new Dictionary<string, IList<string>>();
     Dictionary<string, IList<string>> dicStrFil = new Dictionary<string, IList<string>>();
@@ -275,26 +275,26 @@
                 </div>
 
 
-                @foreach (AgroEnsayos.Domain.Entities.Attribute oArt in filtros)
+                @foreach (AttributeMapping oArt in filtros)
                 {
                     if (auxRubro == "")
                     {
-                        auxRubro = oArt.Family;
+                        auxRubro = oArt.Attribute.Family;
                     }
 
-                    if (oArt.Family == auxRubro)
+                    if (oArt.Attribute.Family == auxRubro)
                     {
-                        auxRubro_ultimo = oArt.Family;
-                        if (oArt.Name != auxNombre)
+                        auxRubro_ultimo = oArt.Attribute.Family;
+                        if (oArt.Attribute.Name != auxNombre)
                         {
-                            auxNombre = oArt.Name;
+                            auxNombre = oArt.Attribute.Name;
 
                             dicStr.Add(auxNombre, new List<string>());
 
 
                             auxFiltro.Add(oArt);
                         }
-                        dicStr[auxNombre].Add(oArt.AttributeMappings.First().MappedValue);
+                        dicStr[auxNombre].Add(oArt.MappedValue);
 
                     }
                     else
@@ -304,17 +304,17 @@
                             <dt onclick="MostrarDt(this);">@auxRubro</dt>
                             <dd>
                                 <ol>
-                                    @foreach (AgroEnsayos.Domain.Entities.Attribute Atr in auxFiltro)
+                                    @foreach (AttributeMapping Atr in auxFiltro)
                                     {
                                         i_atr = 0;
                                         <li>
-                                            <a href="javaScript:void(0);" onclick="OpenValues('val_@Atr.Id');">@Atr.Name</a>
-                                            <div id="val_@Atr.Id" style="display:none;padding: 20px 0 0 10px;">
-                                                @foreach (string str in dicStr[Atr.Name])
+                                            <a href="javaScript:void(0);" onclick="OpenValues('val_@Atr.Attribute.Id');">@Atr.Attribute.Name</a>
+                                            <div id="val_@Atr.Attribute.Id" style="display:none;padding: 20px 0 0 10px;">
+                                                @foreach (string str in dicStr[Atr.Attribute.Name])
                                                 {
                                                     if (str.ToString() != "")
                                                     {
-                                                        <a style="width:180px" id="fil_@Atr.Id@i_atr" name="fil_@Atr.Id@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_@Atr.Id','@Atr.Name','@i_atr','@Atr.Id');">@str.ToString()</a>
+                                                        <a style="width:180px" id="fil_@Atr.Attribute.Id@i_atr" name="fil_@Atr.Attribute.Id@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_@Atr.Attribute.Id','@Atr.Attribute.Name','@i_atr','@Atr.Attribute.Id');">@str.ToString()</a>
                                                     }
                                                     i_atr++;
                                                 }
@@ -327,7 +327,7 @@
                     </div>
                                     auxFiltro.Clear();
                                     dicStr.Clear();
-                                    auxRubro = oArt.Family;
+                                    auxRubro = oArt.Attribute.Family;
                     }
                 }
                 @if (auxFiltro.Count > 0)
@@ -337,17 +337,17 @@
                             <dt onclick="MostrarDt(this);">@auxRubro_ultimo</dt>
                             <dd>
                                 <ol>
-                                    @foreach (AgroEnsayos.Domain.Entities.Attribute Atr1 in auxFiltro)
+                                    @foreach (AttributeMapping Atr1 in auxFiltro)
                                     {
                                         i_atr = 0;
                                         <li>
-                                            <a href="javaScript:void(0);" onclick="OpenValues('val_@Atr1.Id');">@Atr1.Name</a>
-                                            <div id="val_@Atr1.Id"  style="display:none;padding: 20px 0 0 10px;">
-                                                @foreach (string str in dicStr[Atr1.Name])
+                                            <a href="javaScript:void(0);" onclick="OpenValues('val_@Atr1.Attribute.Id');">@Atr1.Attribute.Name</a>
+                                            <div id="val_@Atr1.Attribute.Id"  style="display:none;padding: 20px 0 0 10px;">
+                                                @foreach (string str in dicStr[Atr1.Attribute.Name])
                                                 {
                                                     if (str.ToString() != "")
                                                     {
-                                                        <a style="width:180px" id="fil_@Atr1.Id@i_atr" name="fil_@Atr1.Id@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_@Atr1.Id','@Atr1.Name','@i_atr','@Atr1.Id');">@str.ToString()</a>
+                                                        <a style="width:180px" id="fil_@Atr1.Attribute.Id@i_atr" name="fil_@Atr1.Attribute.Id@i_atr" href="javaScript:void(0);" onclick="sendFilter_a('fil_@Atr1.Attribute.Id','@Atr1.Attribute.Name','@i_atr','@Atr1.Attribute.Id');">@str.ToString()</a>
                                                     }
                                                     i_atr++;
                                                 }
@@ -470,22 +470,22 @@
                 success: function (jsonData) {
                     if (jsonData.length > 0) {
                         $("#chart_div").show();
-                     //   $("#loadinggif2").hide();
+                        $("#loadinggif2").hide();
 
                         var chartcategories = [];
                         var chartpoints = [];
                         $(jsonData).each(function (i, item) {
-                            chartcategories.push(item.Producto);
+                            chartcategories.push(item.ProductName);
                             var color = '#2f7ed8';
-                            if (item.Producto == 'PROMEDIO')
+                            if (item.ProductName == 'PROMEDIO')
                             {
                                 color = '#0d233a';
                             }
-                            else if (item.Producto == 'ULTIMO')
+                            else if (item.ProductName == 'ULTIMO')
                             {
                                 color = '#910000';
                             }
-                            chartpoints.push({y: item.Rinde, color: color});
+                            chartpoints.push({y: item.Yield, color: color});
                         });
 
                         /* Chart */

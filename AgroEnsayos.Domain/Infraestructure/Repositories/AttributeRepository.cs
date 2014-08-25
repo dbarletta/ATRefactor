@@ -16,7 +16,7 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
         List<string> GetOriginalValues(int attributeId);
         void SaveGraph(Domain.Entities.Attribute attribute);
 
-        List<Entities.Attribute> GetFilters(int categoryId);
+        List<AttributeMapping> GetFilters(int categoryId);
     }
 
     public class AttributeRepository : RepositoryBase<Entities.Attribute>, IAttributeRepository
@@ -52,18 +52,19 @@ namespace AgroEnsayos.Domain.Infraestructure.Repositories
             }
         }
 
-        //TODO: Chequear los resultados de este query.
-        public List<Entities.Attribute> GetFilters(int categoryId)
+        public List<AttributeMapping> GetFilters(int categoryId)
         {
             using (var ctx = _factory.Create() as DbAgrotool)
             {
-                var query = ctx.Attributes.Where(a => a.Categories.Select(c => c.Id).Contains(categoryId)
-                                                   && a.AttributeMappings.Any()
-                                                   && a.IsFilter)
-                                           .Include(a => a.AttributeMappings)
-                                           .OrderByDescending(a => new { a.Family, a.Name });
+                var query = ctx.AttributeMappings.Where(a => a.Attribute.Categories.Select(c => c.Id).Contains(categoryId)
+                                                          && a.Attribute.IsFilter)
+                                           .Include(a => a.Attribute)
+                                           .OrderBy(a => a.Attribute.Family)
+                                           .ThenBy(a => a.Attribute.Name);
 
                 var result = query.ToList();
+
+                result.ForEach(a => a.Attribute.Family = a.Attribute.Family ?? "Caracteristicas");
 
                 return result;
             }
