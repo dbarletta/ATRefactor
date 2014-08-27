@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[temp_ensayos] (
+﻿CREATE TABLE [dbo].[Temp_Tests] (
     [Fuente]              VARCHAR (50)  NULL,
     [Provincia]           VARCHAR (50)  NULL,
     [Localidad]           VARCHAR (50)  NULL,

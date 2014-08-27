@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[temp_productos] (
+﻿CREATE TABLE [dbo].[Temp_Products] (
     [Categoria]      NVARCHAR (255) NULL,
     [Subcategoria]   NVARCHAR (255) NULL,
     [Empresa]        NVARCHAR (255) NULL,

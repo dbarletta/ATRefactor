@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgroEnsayos", "AgroEnsayos\AgroEnsayos.csproj", "{4D5D1287-AAF1-47FC-B045-BAB37D28BC27}"
 EndProject
@@ -18,7 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{28ECF9
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
 EndProject
-Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "AgroEnsayos.Database", "AgroEnsayos.Database\AgroEnsayos.Database.sqlproj", "{769DBBF0-C69E-4608-98B8-59F10CA9D6F1}"
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "AgroTool.Database", "AgroEnsayos.Database\AgroTool.Database.sqlproj", "{769DBBF0-C69E-4608-98B8-59F10CA9D6F1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgroEnsayos.Domain", "AgroEnsayos.Domain\AgroEnsayos.Domain.csproj", "{67D04C90-CE10-4F7C-B0DF-B71C0DBEB012}"
 EndProject
