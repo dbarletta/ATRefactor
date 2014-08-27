@@ -1,7 +1,7 @@
-﻿CREATE TABLE [dbo].[Temp_Places] (
-    [Department] VARCHAR (50) NULL,
-    [Header]     VARCHAR (50) NULL,
-    [Province]    VARCHAR (50) NULL,
+﻿CREATE TABLE [dbo].[temp_lugares] (
+    [Departamento] VARCHAR (50) NULL,
+    [Cabecera]     VARCHAR (50) NULL,
+    [Provincia]    VARCHAR (50) NULL,
     [Geometry]     XML          NULL
 );
 
